@@ -9,3 +9,8 @@ DataPath_Mask_Tumor='../../Data/Data_LiTS/mask_Tumor/'
 
 # Generated CSV file
 CSVPath='../../Data/Data_LiTS/csv/'
+
+# Generated net data
+DataPath_Net_CheckPoint='../../Data/Data_LiTS/CheckPoint/'
+DataPath_Net_Interrupt='../../Data/Data_LiTS/CheckPoint/Interrupted.pth'
+DataPath_Net_Normal='../../Data/Data_LiTS/CheckPoint/Normal.pth'
