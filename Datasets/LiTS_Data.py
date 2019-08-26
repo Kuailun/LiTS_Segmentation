@@ -67,8 +67,13 @@ class mDataset(Dataset):
         #     pass
         imgPath,maskPath=self.imgs[index]
         img=cv2.imread(imgPath)[:,:,0]
+        # cv2.imshow('img', img)
+        # cv2.waitKey(0)
         img = img[np.newaxis,:,:]
         mask=cv2.imread(maskPath)[:,:,0]
+
+        # cv2.imshow('mask',mask*127)
+        # cv2.waitKey()
         mask = LabelToOnehot(mask,self.classes)
         sample={'img':torch.from_numpy(img),'mask':torch.from_numpy(mask)}
         return sample
