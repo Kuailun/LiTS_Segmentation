@@ -1,8 +1,7 @@
-from Model.mModel import UNet
+from Try.Model.mModel import UNet
 import os
 import torch
-import mPath
-import Utils as ut
+from Try import Utils as ut, mPath
 
 GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
@@ -25,7 +24,7 @@ if __name__=='__main__':
         net.load_state_dict(torch.load(mPath.DataPath_Net_Normal))
         pass
     else:
-        net.load_state_dict(torch.load(mPath.DataPath_Net_Normal,map_location='cpu'))
+        net.load_state_dict(torch.load(mPath.DataPath_Net_Normal, map_location='cpu'))
 
     try:
         predict_net()
@@ -33,4 +32,4 @@ if __name__=='__main__':
 
     except KeyboardInterrupt:
         ut.CheckDirectory(mPath.DataPath_Net_CheckPoint)
-        torch.save(net.state_dict(),mPath.DataPath_Net_Interrupt)
+        torch.save(net.state_dict(), mPath.DataPath_Net_Interrupt)

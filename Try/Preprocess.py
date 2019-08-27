@@ -1,6 +1,6 @@
-import sys,os
+import os
 
-import mPath
+from Try import mPath
 
 from medpy.io import load, save
 import os.path
@@ -182,6 +182,9 @@ def generate_csv(mask_path,volume_path, save_folder):
                 csv_content.append((volume_path+volumeDir+fileName,mask_path+maskDir+fileName))
             pass
         pass
+    csv_array=np.array(csv_content)
+    np.random.shuffle(csv_array)
+    csv_content=csv_array.tolist()
 
     headers=['volume_path','mask_path']
     with open(save_folder+'data.csv','w',newline='') as f:
@@ -201,8 +204,8 @@ checkdirs()
 # preprocessing(image_path=mPath.DataPath_Nii, type='segmentation',save_folder=mPath.DataPath_Mask)
 
 # 仅输出带有标记的图片
-preprocessing_filter(mPath.DataPath_Nii,mPath.DataPath_Volume,mPath.DataPath_Mask,resize=(256,256),rate=0.1)
-generate_csv(mPath.DataPath_Mask,mPath.DataPath_Volume,mPath.CSVPath)
+# preprocessing_filter(mPath.DataPath_Nii,mPath.DataPath_Volume,mPath.DataPath_Mask,resize=(128,128),rate=0.1)
+generate_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath)
 
 #
 # a=[[1,0,0],[0,2,0],[1,2,1]]

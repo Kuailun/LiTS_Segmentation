@@ -10,15 +10,18 @@ def CheckDirectory(p):
         pass
     pass
 
-def OnehotToLabel(img):
-    data=img[1,:,:]+2*img[2,:,:]
+def OnehotToLabel(img,classes):
+    if(classes==2):
+        data=img[1,:,:]
+    else:
+        data=img[1,:,:]+2*img[2,:,:]
     return data
 
-def plot_img(img,path,type):
+def plot_img(img,path,type,classes):
     '''Save img to directory'''
     if type=="Input":
         img=img.cpu()
-        img=img.numpy()
+        img=img.numpy()*255
         cv2.imwrite(path,img)
         pass
     elif type=="Output":
@@ -29,7 +32,7 @@ def plot_img(img,path,type):
     elif type=='Mask':
         img = img.cpu()
         img = img.detach().numpy()
-        data=OnehotToLabel(img)*127
+        data=OnehotToLabel(img,classes)*127
         cv2.imwrite(path, data)
         pass
     pass
