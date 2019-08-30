@@ -8,7 +8,7 @@ DataPath_Mask_Liver='../Data/Data_LiTS/mask_Liver/'
 DataPath_Mask_Tumor='../Data/Data_LiTS/mask_Tumor/'
 
 # Generated CSV file
-CSVPath='../../Data/Data_LiTS/csv/'
+CSVPath='../Data/Data_LiTS/csv/'
 
 # Generated net data
 DataPath_Net_CheckPoint='../Data/Data_LiTS/CheckPoint/'

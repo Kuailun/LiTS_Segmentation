@@ -1,13 +1,13 @@
 import os
 
-from BaseLine import mPath
+import mPath
 
 from medpy.io import load, save
 import os.path
 import numpy as np
 import csv
 import cv2
-import random
+
 
 def getRangImageDepth(image):
     """
@@ -65,7 +65,7 @@ def preprocessing_filter(nii,volume,mask,resize,rate,slices):
             im2 = cv2.resize(im2, resize)
 
             save(im1, volume + 'volume-' + str(i) + '/' + str(index) + '.jpg')
-            save(im2, mask + 'segmentation-' + str(i) + '/' + str(index) + '.jpg')
+            save(im2*100, mask + 'segmentation-' + str(i) + '/' + str(index) + '.jpg')
             print("Saving image " + str(i) + " "+ str(index))
 
 
@@ -112,5 +112,5 @@ def generate_csv(mask_path,volume_path, save_folder):
 
 
 
-preprocessing_filter(mPath.DataPath_Nii,mPath.DataPath_Volume,mPath.DataPath_Mask,resize=(128,128),rate=0.1,slices=3)
+# preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), rate=0.1, slices=3)
 generate_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath)
