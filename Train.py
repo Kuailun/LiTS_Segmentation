@@ -12,13 +12,13 @@ GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
-Train_Epochs=300
+Train_Epochs=5000
 Train_Batch_Size=10
 Validation_Percent=0.1
 Save_CheckPoint=True
-Output_per_epoch=1
+Output_per_epoch=20
 learning_rate=0.001
-weights=[0.2,0.8,0]
+weights=[0,1,0]
 
 writer=SummaryWriter()
 
@@ -26,7 +26,7 @@ writer=SummaryWriter()
 print("GPU status {}".format(Use_GPU))
 
 def adjust_learning_rate(optimizer,epoch):
-    lr=learning_rate*(0.1**(epoch//100))
+    lr=learning_rate*(0.1**(epoch//1000))
     for param_group in optimizer.param_groups:
         param_group['lr']=lr
         pass
@@ -45,6 +45,10 @@ def train_net(net,
                         lr=lr,
                         momentum=0.9,
                         weight_decay=0.0005)
+    # optimizer=optim.adam(net.parameters(),
+    #                      lr=lr,
+    #                      momentum=0.9,
+    #                      weight_decay=0.0005)
     # optimizer.zero_grad()
     # criterion=nn.BCELoss()
     criterion= Loss.MultclassDiceLoss()
@@ -180,7 +184,7 @@ def train_net(net,
     pass
 
 if __name__=='__main__':
-    net=UNet_Yading(n_channels=2,n_classes=Output_Class)
+    net=ResUnet(n_channels=1,n_classes=Output_Class)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))
 
@@ -190,7 +194,6 @@ if __name__=='__main__':
 
     try:
         ut.CheckDirectory(mPath.DataPath_Log)
-        # train_net(net,lr=learning_rate,epochs=Train_Epochs,batch_size=Train_Batch_Size,val_percent=Validation_Percent,save_cp=Save_CheckPoint,gpu=Use_GPU,classes=Output_Class)
         train_net(net, lr=learning_rate, epochs=Train_Epochs, batch_size=Train_Batch_Size,val_percent=Validation_Percent, save_cp=Save_CheckPoint, gpu=Use_GPU, classes=Output_Class)
 
     except KeyboardInterrupt:

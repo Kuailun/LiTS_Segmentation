@@ -65,7 +65,7 @@ def preprocessing_filter(nii,volume,mask,resize,rate,slices):
             im2 = cv2.resize(im2, resize)
 
             save(im1, volume + 'volume-' + str(i) + '/' + str(index) + '.jpg')
-            save(im2*100, mask + 'segmentation-' + str(i) + '/' + str(index) + '.jpg')
+            save(im2, mask + 'segmentation-' + str(i) + '/' + str(index) + '.jpg')
             print("Saving image " + str(i) + " "+ str(index))
 
 

@@ -48,6 +48,10 @@ def dice_cofficient(truth,output,layer=1):
     truth[truth==the_other]=0
     output[output==the_other]=0
 
+    s=np.sum(truth)
+    if(s==0):
+        return 1
+
     d1=np.sum(truth[output==layer])
     d2=np.sum(truth[truth==layer])
     d3=np.sum(output[output==layer])

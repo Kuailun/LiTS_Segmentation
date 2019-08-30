@@ -69,17 +69,18 @@ class Dataset_WithLiver(Dataset):
         img=cv2.imread(imgPath)[:,:,0]
         img=img/255
 
-        input=np.zeros((2,img.shape[0],img.shape[1]))
-        input[0,:,:]=img
+        # input=np.zeros((2,img.shape[0],img.shape[1]))
+        # input[0, :, :] = img
+        input=img[np.newaxis,:,:]
 
-        mask=cv2.imread(maskPath)[:,:,0]//100
+        mask=cv2.imread(maskPath)[:,:,0]
 
-        temp=np.copy(mask)
-        temp[temp==2]=1
+        # temp=np.copy(mask)
+        # temp[temp==2]=1
+        #
+        # input[1,:,:]=temp
 
-        input[1,:,:]=temp
-
-        mask[mask==1]=0
+        # mask[mask==1]=0
         mask[mask==2]=1
 
         mask = LabelToOnehot(mask,self.classes)

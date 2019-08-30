@@ -74,3 +74,69 @@ class UNet_Yading(nn.Module):
         x = torch.sigmoid(x)
         return x  # 进行二分类
     pass
+
+class ResUnet(nn.Module):
+    def __init__(self,n_channels, n_classes):
+        super(ResUnet, self).__init__()
+        self.shortcut1 = shortcut(1, 32)
+        self.d_conv1=double_conv(n_channels,32)
+        self.pool=nn.MaxPool2d(2)
+
+        self.shortcut2=shortcut(32,64)
+        self.d_conv2=double_conv(32,64)
+
+        self.shortcut3=shortcut(64,128)
+        self.d_conv3=tripple_conv(64,128)
+
+        self.shortcut4=shortcut(128,256)
+        self.d_conv4=tripple_conv(128,256)
+
+        self.shortcut5=shortcut(256,512)
+        self.d_conv5=tripple_conv(256,512)
+
+        self.up4 = res_up3(1024, 256)
+        self.up3 = res_up3(512, 128)
+        self.up2 = res_up3(256, 64)
+        self.up1 = res_up3(128, 32)
+
+        self.outconv=nn.Conv2d(32,n_classes,1)
+
+    def forward(self, x):
+        x1=self.d_conv1(x)
+        x1_res=self.shortcut1(x)+x1
+        x1_res=self.pool(x1_res)
+
+        x2=self.d_conv2(x1_res)
+        x2_res=self.shortcut2(x1_res)+x2
+        x2_res=self.pool(x2_res)
+
+        x3=self.d_conv3(x2_res)
+        x3_res=self.shortcut3(x2_res)+x3
+        x3_res=self.pool(x3_res)
+
+        x4=self.d_conv4(x3_res)
+        x4_res=self.shortcut4(x3_res)+x4
+        x4_res=self.pool(x4_res)
+
+        x5=self.d_conv5(x4_res)
+        x5_res=self.shortcut5(x4_res)+x5
+
+        x = self.up4(x5_res, x4)
+        x = self.up3(x, x3)
+        x = self.up2(x, x2)
+        x = self.up1(x, x1)
+
+        x=self.outconv(x)
+        x = torch.sigmoid(x)
+        return x  # 进行二分类
+
+
+
+
+
+
+
+
+
+
+
