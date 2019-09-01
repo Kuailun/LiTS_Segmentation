@@ -12,7 +12,7 @@ GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
-Train_Epochs=1000
+Train_Epochs=1
 Train_Batch_Size=1
 Validation_Percent=0.1
 Save_CheckPoint=True
@@ -41,107 +41,45 @@ def train_net(net,
               save_cp=True,
               gpu=True,
               classes=3):
-    optimizer=optim.SGD(net.parameters(),
-                        lr=lr,
-                        momentum=0.9,
-                        weight_decay=0.0005)
-    # optimizer=optim.adam(net.parameters(),
-    #                      lr=lr,
-    #                      momentum=0.9,
-    #                      weight_decay=0.0005)
-    # optimizer.zero_grad()
-    # criterion=nn.BCELoss()
-    criterion= Loss.MultclassDiceLoss()
 
     mTrain,mValid = LiTS_Data.split_to_train_val(mPath.CSVPath + "data.csv", val_percent)
 
     mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain, classes=classes)
-    mValDataset= LiTS_Data.Dataset_WithLiver(mValid, classes=classes)
 
     mTrainDataloader=DataLoader(dataset=mTrainDataset,batch_size=batch_size,shuffle=True)
-    modeList=[]
-    if len(mValid)==0:
-        modeList=['train']
-    else:
-        mValDataloader = DataLoader(dataset=mValDataset, batch_size=batch_size, shuffle=True)
-        modeList = ['train', 'val']
 
-
-
-
-    best_acc=0.0
-    batch_count=0
-
-    # Begin training
-    iter_train=0
-    iter_val=0
     for epoch in range(epochs):
-        print()
-        print()
-        print('-' * 10)
-        print("Starting epoch {}/{}".format(epoch+1,epochs))
 
-        adjust_learning_rate(optimizer,epoch)
+        net.eval()
+        dataset=mTrainDataloader
 
-        for phase in modeList:
-            print()
-            if(phase=='train'):
-                net.train()
-                dataset=mTrainDataloader
-                dataLength=len(mTrainDataset)
-            else:
-                net.eval()
-                dataset=mValDataloader
-                dataLength = len(mValDataset)
+        for index,sample in enumerate(dataset):
+            img = sample['img']
+            mask = sample['mask']
+
+            if gpu:
+                img = img.cuda()
+                mask = mask.cuda()
                 pass
 
-            running_loss=0.0
-            running_corrects=0
-            running_dice=0.0
+            img = img.float()
+            mask = mask.float()
 
-            for index,sample in enumerate(dataset):
-                batch_count=batch_count+1
-                img = sample['img']
-                mask = sample['mask']
+            # 只有训练阶段才追踪历史
+            with torch.set_grad_enabled(False):
+                output = net(img)
+                _, preds = torch.max(output, 1)
 
-                if gpu:
-                    img = img.cuda()
-                    mask = mask.cuda()
+                preds_onehot=torch.zeros_like(mask)
+                for i in range(preds_onehot.shape[1]):
+                    preds_onehot[:,i,:,:]=preds==i
                     pass
+            pass
 
-                img = img.float()
-                mask = mask.float()
-
-                # 清空参数的梯度
-                optimizer.zero_grad()
-
-                # 只有训练阶段才追踪历史
-                with torch.set_grad_enabled(False):
-                    output = net(img)
-                    _, preds = torch.max(output, 1)
-
-                    preds_onehot=torch.zeros_like(mask)
-                    for i in range(preds_onehot.shape[1]):
-                        preds_onehot[:,i,:,:]=preds==i
-                        pass
-                pass
-            if not (dataLength==0):
-                epoch_loss=running_loss/dataLength
-                epoch_acc=running_corrects/dataLength
-                epoch_dice=running_dice/dataLength
-            else:
-                epoch_loss=0
-                epoch_acc=0
-                epoch_dice=0
-
-            print('{} Loss:{:.6f} Acc:{:.10f} Dice:{:.10f}'.format(phase,epoch_loss,epoch_acc,epoch_dice))
-            # writer.add_scalars('scalar/epoch_data', {'epoch_loss': epoch_loss, 'epoch_acc': epoch_acc},
-            #                    epoch)
-
-            if epoch%Output_per_epoch==0:
-                ut.plot_img(img[0,0,:,:], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input",2)
-                ut.plot_img(mask[0, :, :, :], mPath.DataPath_Log + "Mask0-" + str(epoch) + ".jpg", "Mask",2)
-                ut.plot_img(preds[0, :, :], mPath.DataPath_Log + "Output0-" + str(epoch) + ".jpg", "Output",2)
+        if epoch%Output_per_epoch==0:
+            ut.plot_img(img[0,0,:,:], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input",2)
+            ut.plot_img(mask[0, :, :, :], mPath.DataPath_Log + "Mask0-" + str(epoch) + ".jpg", "Mask",2)
+            ut.plot_img(preds[0, :, :], mPath.DataPath_Log + "Output0-" + str(epoch) + ".jpg", "Output",2)
             pass
         pass
     writer.close()

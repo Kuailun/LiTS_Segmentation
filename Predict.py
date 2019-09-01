@@ -22,7 +22,6 @@ weights=[0,1,0]
 predict_mode=1  #1-预测一个patch, #2-预测一个layer, #3-预测一个nii
 
 def predict_patch(net,img,gpu):
-    net.eval()
     img=img[np.newaxis,np.newaxis,:,:]
     img=torch.from_numpy(img)
 
@@ -72,27 +71,20 @@ def predict_layer(net,layer,gpu):
     ut.save_img(preds,mPath.DataPath_Volume_Predict + "output.jpg")
 
 
-
-
-
-
-
-# predict_Nii()
-# predict_Layer()
-# predict_Patch()
-
 if __name__=='__main__':
-    net=UNet_Yading(n_channels=1,n_classes=Output_Class)
+    # net=UNet_Yading(n_channels=1,n_classes=Output_Class)
+    net=torch.load(mPath.DataPath_Net_Normal)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))
 
     if Use_GPU:
         net.cuda()
-        net.load_state_dict(torch.load(mPath.DataPath_Net_Predict))
+        # net.load_state_dict(torch.load(mPath.DataPath_Net_Predict))
+        params=list(net.named_parameters())
         print('Using GPU')
     else:
         net.cpu()
-        net.load_state_dict(torch.load(mPath.DataPath_Net_Predict,map_location='cpu'))
+        # net.load_state_dict(torch.load(mPath.DataPath_Net_Predict,map_location='cpu'))
         print('Using CPU')
 
     print("Pretrained model loaded")
@@ -100,7 +92,8 @@ if __name__=='__main__':
     mCSV=LiTS_Data.read_in_csv(mPath.CSVPath+"predict.csv")
 
     if predict_mode==1:
-        img=cv2.imread('F:/Workspace/python/Data/Data_LiTS/volume/volume-0/1-2.jpg')[:,:,0]/255
+        img = cv2.imread('F:/Workspace/python/Data/Data_LiTS/volume/volume-0/1-2.jpg')[:, :, 0]
+        img = img / 255
         mask=predict_patch(net,img,Use_GPU)
         pass
     if predict_mode==2:

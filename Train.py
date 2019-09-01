@@ -12,7 +12,7 @@ GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
-Train_Epochs=1000
+Train_Epochs=400
 Train_Batch_Size=10
 Validation_Percent=0.1
 Save_CheckPoint=True
@@ -174,12 +174,7 @@ def train_net(net,
             print('{} Loss:{:.6f} Acc:{:.10f} Dice:{:.10f}'.format(phase,epoch_loss,epoch_acc,epoch_dice))
             # writer.add_scalars('scalar/epoch_data', {'epoch_loss': epoch_loss, 'epoch_acc': epoch_acc},
             #                    epoch)
-            if phase=='train' and epoch_dice>best_acc:
-                best_acc=epoch_dice
-                ut.CheckDirectory(mPath.DataPath_Net_CheckPoint)
-                torch.save(net.state_dict(), mPath.DataPath_Net_Normal)
-                print('save model')
-                pass
+
 
             if epoch%Output_per_epoch==0:
                 ut.plot_img(img[0,0,:,:], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input",2)
@@ -187,6 +182,8 @@ def train_net(net,
                 ut.plot_img(preds[0, :, :], mPath.DataPath_Log + "Output0-" + str(epoch) + ".jpg", "Output",2)
             pass
         pass
+    torch.save(net, mPath.DataPath_Net_Normal)
+    params = list(net.named_parameters())
     writer.close()
     pass
 
