@@ -9,6 +9,7 @@ def read_in_csv(path):
     if not(os.path.exists(path)):
         raise(path+" is not existed")
     mCSV=pd.read_csv(path)
+    mCSV=mCSV.iloc[:,:].values
     return mCSV
 
 def split_to_train_val(mCSV,rate,shuffle=False):
@@ -19,7 +20,6 @@ def split_to_train_val(mCSV,rate,shuffle=False):
     :return:
     """
     imgs=read_in_csv(mCSV)
-    imgs=imgs.iloc[:,:].values
     if(shuffle):
         pass
     train=[]
@@ -28,12 +28,16 @@ def split_to_train_val(mCSV,rate,shuffle=False):
     if rate==0:
         train=imgs
         print("Dataset Initialization finished: Train {0}, Val 0".format(train.shape[0]))
-        val=[]
+        val=np.array(val)
     else:
         x,y=imgs.shape
         num=int(x*rate)
-        train=imgs[num:-1]
-        val=imgs[0:num]
+        if num==0:
+            train=imgs
+            val=np.array(val)
+        else:
+            train=imgs[num:-1]
+            val=imgs[0:num]
         print("Dataset Initialization finished: Train {0}, Val {1}".format(train.shape[0], val.shape[0]))
         pass
 
@@ -80,7 +84,7 @@ class Dataset_WithLiver(Dataset):
         #
         # input[1,:,:]=temp
 
-        # mask[mask==1]=0
+        mask[mask==1]=0
         mask[mask==2]=1
 
         mask = LabelToOnehot(mask,self.classes)

@@ -13,10 +13,10 @@ os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
 Train_Epochs=1000
-Train_Batch_Size=10
+Train_Batch_Size=1
 Validation_Percent=0.1
 Save_CheckPoint=True
-Output_per_epoch=5
+Output_per_epoch=1
 learning_rate=0.01
 weights=[0,1,0]
 
@@ -116,7 +116,7 @@ def train_net(net,
                 optimizer.zero_grad()
 
                 # 只有训练阶段才追踪历史
-                with torch.set_grad_enabled(phase == 'train'):
+                with torch.set_grad_enabled(False):
                     output = net(img)
                     _, preds = torch.max(output, 1)
 
@@ -124,43 +124,6 @@ def train_net(net,
                     for i in range(preds_onehot.shape[1]):
                         preds_onehot[:,i,:,:]=preds==i
                         pass
-
-                    # loss = criterion(output, mask)
-                    loss = criterion(output, mask,weights)
-
-                    if phase=='train':
-                        loss.backward()
-                        optimizer.step()
-                        pass
-
-                #  记录loss和准确率
-                subloss=loss.item()
-                subaccTotal=torch.sum(preds_onehot==mask.data)
-
-                subaccTotal=subaccTotal.float()
-                subaccTotal=subaccTotal/img.shape[0]/classes/img.shape[2]/img.shape[3]
-
-                running_loss+=subloss*img.size(0)
-                running_corrects+=subaccTotal*img.size(0)
-
-                mask_ori=mask[:,1,:,:]
-                sub_dice=ut.dice_cofficient(mask_ori,preds,1)
-
-                samples=mask.shape[0]
-                running_dice=running_dice+sub_dice*samples
-
-                if(phase=='train'):
-                    writer.add_scalar('train_loss', subloss, iter_train)
-                    writer.add_scalar('train_acc', subaccTotal, iter_train)
-                    writer.add_scalar('train_dice', sub_dice, iter_train)
-                    iter_train+=1
-                elif(phase=='val'):
-                    writer.add_scalar('val_loss', subloss, iter_val)
-                    writer.add_scalar('val_acc', subaccTotal, iter_val)
-                    writer.add_scalar('val_dice', sub_dice, iter_val)
-                    iter_val += 1
-
-                print('{} Loss:{:.6f} Acc:{:.10f} Dice:{:.10f}'.format(index, subloss, subaccTotal,sub_dice))
                 pass
             if not (dataLength==0):
                 epoch_loss=running_loss/dataLength
@@ -174,12 +137,6 @@ def train_net(net,
             print('{} Loss:{:.6f} Acc:{:.10f} Dice:{:.10f}'.format(phase,epoch_loss,epoch_acc,epoch_dice))
             # writer.add_scalars('scalar/epoch_data', {'epoch_loss': epoch_loss, 'epoch_acc': epoch_acc},
             #                    epoch)
-            if phase=='train' and epoch_dice>best_acc:
-                best_acc=epoch_dice
-                ut.CheckDirectory(mPath.DataPath_Net_CheckPoint)
-                torch.save(net.state_dict(), mPath.DataPath_Net_Normal)
-                print('save model')
-                pass
 
             if epoch%Output_per_epoch==0:
                 ut.plot_img(img[0,0,:,:], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input",2)
@@ -191,12 +148,11 @@ def train_net(net,
     pass
 
 if __name__=='__main__':
-    net=UNet(n_channels=1,n_classes=Output_Class)
-    # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
-    # writer.add_graph(net,input_to_model=(dummy_input,))
+    net=UNet_Yading(n_channels=1,n_classes=Output_Class)
 
     if Use_GPU:
         net.cuda()
+        net.load_state_dict(torch.load(mPath.DataPath_Net_Predict))
         pass
 
     try:

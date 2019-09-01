@@ -27,6 +27,7 @@ def plot_img(img,path,type,classes):
     elif type=="Output":
         img = img.cpu()
         img = img.detach().numpy()*127
+        img= np.array(img,dtype='uint8')
         cv2.imwrite(path, img)
         pass
     elif type=='Mask':
@@ -36,6 +37,9 @@ def plot_img(img,path,type,classes):
         cv2.imwrite(path, data)
         pass
     pass
+
+def save_img(img,path):
+    cv2.imwrite(path, img*127)
 
 def dice_cofficient(truth,output,layer=1):
     truth=truth.cpu()
@@ -58,6 +62,25 @@ def dice_cofficient(truth,output,layer=1):
     d4=np.sum(output[truth==layer])
     dice=d1*2/(d2+d3)
     if not (dice>=0 and dice<=1):
-        print('here')
         print(d4)
     return dice
+
+def Merge_Patches(samples,size,patch):
+    block_width=samples.shape[0]
+    block_height=samples.shape[1]
+    width=size[0]
+    height=size[1]
+    stride_width = (width - block_width) // (patch - 1)
+    stride_height = (height - block_height) // (patch - 1)
+
+    ret_samples = np.empty(shape=(width,height), dtype=np.uint8)
+    index = 0
+    for x in range(0, width - block_width + 1, stride_width):
+        for y in range(0, height - block_height + 1, stride_height):
+            ret_samples[x:x + block_width, y:y + block_height] = ret_samples[x:x + block_width, y:y + block_height]+samples[:,:,index]
+            index = index + 1
+            pass
+        pass
+    ret_samples[ret_samples>=1]=1
+
+    return ret_samples

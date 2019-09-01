@@ -1,11 +1,11 @@
 # Orginial data in Nii format
 DataPath_Nii="../Data/Data_LiTS/Nii/"
+DataPath_Nii_Predict='../Data/Data_LiTS/Nii_Predict/'
 
 # Converted volume data in jpg format
 DataPath_Volume='../Data/Data_LiTS/volume/'
 DataPath_Mask='../Data/Data_LiTS/mask/'
-DataPath_Mask_Liver='../Data/Data_LiTS/mask_Liver/'
-DataPath_Mask_Tumor='../Data/Data_LiTS/mask_Tumor/'
+DataPath_Volume_Predict='../Data/Data_LiTS/volume_predict/'
 
 # Generated CSV file
 CSVPath='../Data/Data_LiTS/csv/'
@@ -17,3 +17,5 @@ DataPath_Net_Normal='../Data/Data_LiTS/CheckPoint/Normal.pth'
 
 # Log
 DataPath_Log='Log/'
+
+DataPath_Net_Predict='../Data/Data_LiTS/CheckPoint/75%.pth'
