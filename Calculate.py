@@ -1,0 +1,74 @@
+import mPath
+import os,fnmatch
+from medpy.io import load, save
+import numpy as np
+
+mode=2
+
+def dice_cofficient(truth,output,layer=1):
+    s=np.sum(truth)
+    p=np.sum(output)
+    if(s==0 and p==0):
+        return 1
+
+    d1=np.sum(truth[output==layer])
+    d2=np.sum(truth[truth==layer])
+    d3=np.sum(output[output==layer])
+    d4=np.sum(output[truth==layer])
+    dice=d1*2/(d2+d3)
+    if not (dice>=0 and dice<=1):
+        print(d4)
+    return dice
+def calculateDice(predicted,original,all=True):
+    img1, img_header1 = load(predicted)
+    img2, img_header2 = load(original)
+    layers=img1.shape[2]
+
+    overall_dice=0
+    ll=0
+    for layer in range(layers):
+        img1_layer = img1[:, :, layer]
+        img2_layer = img2[:, :, layer]
+
+        mask=img2_layer.copy()
+        mask[mask==2]=1
+
+        img1_layer=img1_layer*mask
+
+        truth=img2_layer.copy()
+        truth[truth==1]=0
+        truth[truth>0]=1
+
+        dice_score=dice_cofficient(truth,img1_layer,1)
+
+        if all:
+            overall_dice=overall_dice+dice_score
+            ll=ll+1
+        else:
+            if(np.sum(truth)>0):
+                overall_dice = overall_dice + dice_score
+                ll = ll + 1
+        print(str(layer)+'-'+str(dice_score))
+        pass
+
+    print("Overall dice is {}".format(overall_dice/ll))
+
+    return overall_dice,layer
+
+
+
+if __name__=='__main__':
+    if(mode==1):
+        predicted=fnmatch.filter(os.listdir(mPath.DataPath_Volume_Predict),"*.nii")
+
+        original=[mPath.DataPath_Nii+item.replace('-.nii','')+'.nii' for item in predicted]
+
+        predicted = [mPath.DataPath_Volume_Predict + item for item in predicted]
+
+        for i in range(len(predicted)):
+            calculateDice(predicted[i], original[i])
+            pass
+        pass
+    if(mode==2):
+        calculateDice("E:/WorkSpace/Python/Data/Data_LiTS/volume_predict/segmentation-0-.nii","E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-0.nii",False)
+

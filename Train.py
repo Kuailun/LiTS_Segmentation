@@ -26,7 +26,7 @@ writer=SummaryWriter()
 print("GPU status {}".format(Use_GPU))
 
 def adjust_learning_rate(optimizer,epoch):
-    lr=learning_rate*(0.1**(epoch//500))
+    lr=learning_rate*(0.1**(epoch//400))
     for param_group in optimizer.param_groups:
         param_group['lr']=lr
         pass
@@ -180,10 +180,14 @@ def train_net(net,
                 ut.plot_img(img[0,0,:,:], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input",2)
                 ut.plot_img(mask[0, :, :, :], mPath.DataPath_Log + "Mask0-" + str(epoch) + ".jpg", "Mask",2)
                 ut.plot_img(preds[0, :, :], mPath.DataPath_Log + "Output0-" + str(epoch) + ".jpg", "Output",2)
+
+            if(phase=='val' and epoch_dice>best_acc):
+                best_acc=epoch_dice
+                torch.save(net, mPath.DataPath_Net_Normal)
+                pass
             pass
         pass
-    torch.save(net, mPath.DataPath_Net_Normal)
-    params = list(net.named_parameters())
+    torch.save(net, mPath.DataPath_Net_Final)
     writer.close()
     pass
 

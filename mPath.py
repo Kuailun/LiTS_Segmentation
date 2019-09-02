@@ -14,6 +14,7 @@ CSVPath='../Data/Data_LiTS/csv/'
 DataPath_Net_CheckPoint='../Data/Data_LiTS/CheckPoint/'
 DataPath_Net_Interrupt='../Data/Data_LiTS/CheckPoint/Interrupted.pth'
 DataPath_Net_Normal='../Data/Data_LiTS/CheckPoint/Normal.pth'
+DataPath_Net_Final='../Data/Data_LiTS/CheckPoint/Final.pth'
 
 # Log
 DataPath_Log='Log/'

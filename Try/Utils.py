@@ -73,7 +73,7 @@ def Merge_Patches(samples,size,patch):
     stride_width = (width - block_width) // (patch - 1)
     stride_height = (height - block_height) // (patch - 1)
 
-    ret_samples = np.empty(shape=(width,height), dtype=np.uint8)
+    ret_samples = np.zeros(shape=(width,height), dtype=np.uint8)
     index = 0
     for x in range(0, width - block_width + 1, stride_width):
         for y in range(0, height - block_height + 1, stride_height):

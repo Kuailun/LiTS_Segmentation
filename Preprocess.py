@@ -82,7 +82,7 @@ def make_patch(im,patch,resize):
     stride_width=(width-block_width)//(patch-1)
     stride_height=(height-block_height)//(patch-1)
 
-    samples=np.empty(shape=(block_width,block_height,patch*patch),dtype=np.uint8)
+    samples=np.empty(shape=(block_width,block_height,patch*patch),dtype=np.float64)
     index=0
     for x in range(0,width-block_width+1,stride_width):
         for y in range(0,height-block_height+1,stride_height):
@@ -134,15 +134,15 @@ def preprocessing_patch(nii,volume,mask,resize,patch,rate,slices):
             for ind in range(patch*patch):
                 mMaxP=np.max(sub_segment[:,:,ind])
                 if not mMaxP==2:
-                    n=random.randint(1,100)
-                    if(n<rate*100):
-                        save(sub_volume[:, :, ind], volume + 'volume-' + str(i) + '/' + str(j) + "-" + str(ind) + '.jpg')
-                        save(sub_segment[:, :, ind], mask + 'segmentation-' + str(i) + '/' + str(j) + "-" + str(ind) + '.jpg')
+                    # n=random.randint(1,100)
+                    # if(n<rate*100):
+                    #     save(sub_volume[:, :, ind], volume + 'volume-' + str(i) + '/' + str(index) + "-" + str(ind) + '.jpg')
+                    #     save(sub_segment[:, :, ind], mask + 'segmentation-' + str(i) + '/' + str(index) + "-" + str(ind) + '.jpg')
                     continue
                     pass
-                save(sub_volume[:,:,ind], volume + 'volume-' + str(i) + '/' + str(j)+"-"+str(ind) + '.jpg')
-                save(sub_segment[:,:,ind], mask + 'segmentation-' + str(i) + '/' + str(j)+"-"+str(ind) + '.jpg')
-                print("Saving image " + str(i) + " " + str(j)+"-"+str(ind))
+                save(sub_volume[:,:,ind], volume + 'volume-' + str(i) + '/' + str(index)+"-"+str(ind) + '.jpg')
+                save(sub_segment[:,:,ind], mask + 'segmentation-' + str(i) + '/' + str(index)+"-"+str(ind) + '.jpg')
+                print("Saving image " + str(i) + " " + str(index)+"-"+str(ind))
 
 def preprocessing_patch_predict(nii,volume,mask,resize,patch):
     for i in range(70):
@@ -251,8 +251,8 @@ def generate_csv_nii(volume_path, save_folder):
 
 if __name__=='__main__':
 
-    # preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.1, slices=3)
-    # preprocessing_patch(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,rate=0, slices=3)
+    preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.1, slices=3)
+    preprocessing_patch(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,rate=0.05, slices=3)
     generate_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath,"train",shuffle=False)
 
     # preprocessing_patch_predict(mPath.DataPath_Nii,mPath.DataPath_Volume_Predict,mPath.DataPath_Mask_Predict,resize=(128,128),patch=5)
