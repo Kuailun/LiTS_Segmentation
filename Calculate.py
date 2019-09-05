@@ -3,8 +3,6 @@ import os,fnmatch
 from medpy.io import load, save
 import numpy as np
 
-mode=2
-
 def dice_cofficient(truth,output,layer=1):
     s=np.sum(truth)
     p=np.sum(output)
@@ -48,15 +46,16 @@ def calculateDice(predicted,original,all=True):
             if(np.sum(truth)>0):
                 overall_dice = overall_dice + dice_score
                 ll = ll + 1
-        print(str(layer)+'-'+str(dice_score))
+                print(str(layer) + '-' + str(dice_score))
+
         pass
 
     print("Overall dice is {}".format(overall_dice/ll))
 
-    return overall_dice,layer
+    return overall_dice,ll
 
 
-
+mode=3
 if __name__=='__main__':
     if(mode==1):
         predicted=fnmatch.filter(os.listdir(mPath.DataPath_Volume_Predict),"*.nii")
@@ -70,5 +69,18 @@ if __name__=='__main__':
             pass
         pass
     if(mode==2):
-        calculateDice("E:/WorkSpace/Python/Data/Data_LiTS/volume_predict/segmentation-0-.nii","E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-0.nii",False)
+        calculateDice("E:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-121-.nii","E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-121.nii",False)
+        pass
+    if(mode==3):
+        num=10
+        pair1 = ['E:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-' + str(index + 121) + '-.nii' for index in range(num)]
+        pair2 = ['E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-' + str(index + 121) + '.nii' for index in range(num)]
+        overall_dice=0
+        items=0
+        for i in range(len(pair1)):
+            temp_o,temp_i=calculateDice(pair1[i],pair2[i],False)
+            overall_dice=overall_dice+temp_o
+            items=items+temp_i
+            pass
 
+        print('验证集dice='+str(overall_dice/items))

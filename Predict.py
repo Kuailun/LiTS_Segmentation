@@ -21,7 +21,7 @@ Save_CheckPoint=True
 Output_per_epoch=1
 learning_rate=0.01
 weights=[0,1,0]
-predict_mode=3  #1-预测一个patch, #2-预测一个layer, #3-预测一个nii
+
 
 def predict_patch(net,img,gpu):
     net.eval()
@@ -77,7 +77,7 @@ def predict_layer(net,layer,gpu):
 
 def predict_nii(net,nii,gpu,name):
     net.eval()
-
+    nii=np.array(nii,dtype='float64')
     nii[nii < -200] = -200
     nii[nii > 250] = 250
     nii = ((nii + 200) * 255 // 450)
@@ -148,9 +148,9 @@ if __name__=='__main__':
     print("Pretrained model loaded")
 
     # mCSV=LiTS_Data.read_in_csv(mPath.CSVPath+"predict.csv")
-
+    predict_mode = 4  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
     if predict_mode==1:
-        img = cv2.imread('E:/WorkSpace/Python/Data/Data_LiTS/volume/volume-0/57-6.jpg')[:, :, 0]
+        img = cv2.imread('E:/WorkSpace/Python/Data/Data_LiTS/volume/volume-121/252-6.jpg')[:, :, 0]
         img = img / 255
         mask=predict_patch(net,img,Use_GPU)
         pass
@@ -160,12 +160,12 @@ if __name__=='__main__':
         samples=predict_layer(net,img,Use_GPU)
         pass
     if predict_mode==3:
-        img, img_header = load('E:/WorkSpace/Python/Data/Data_LiTS/Nii/volume-0.nii')
-        nii=predict_nii(net,img,Use_GPU,'volume-0')
+        img, img_header = load('E:/WorkSpace/Python/Data/Data_LiTS/Nii/volume-122.nii')
+        nii=predict_nii(net,img,Use_GPU,'volume-122')
         pass
     if predict_mode==4:
         for i in range(10):
-            name='segmentation-'+str(i+121)
+            name='volume-'+str(i+121)
             img,img_header=load(mPath.DataPath_Nii+name+'.nii')
             nii=predict_nii(net,img,Use_GPU,name)
 

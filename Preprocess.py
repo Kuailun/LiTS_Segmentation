@@ -82,7 +82,7 @@ def make_patch(im,patch,resize):
     stride_width=(width-block_width)//(patch-1)
     stride_height=(height-block_height)//(patch-1)
 
-    samples=np.empty(shape=(block_width,block_height,patch*patch),dtype=np.float64)
+    samples=np.empty(shape=(block_width,block_height,patch*patch),dtype='float64')
     index=0
     for x in range(0,width-block_width+1,stride_width):
         for y in range(0,height-block_height+1,stride_height):
@@ -108,6 +108,8 @@ def preprocessing_patch(nii,volume,mask,resize,patch,rate,slices):
 
         img1, img_header1 = load(nii + volumeName)
         img2, img_header2 = load(nii + segmentName)
+
+        img1=np.array(img1,dtype='float64')
 
         img1[img1<-200]=-200
         img1[img1>250]=250
@@ -251,7 +253,7 @@ def generate_csv_nii(volume_path, save_folder):
 
 if __name__=='__main__':
 
-    preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.1, slices=3)
+    # preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.1, slices=3)
     preprocessing_patch(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,rate=0.05, slices=3)
     generate_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath,"train",shuffle=False)
 

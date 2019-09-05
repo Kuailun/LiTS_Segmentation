@@ -12,7 +12,7 @@ GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
-Train_Epochs=400
+Train_Epochs=10
 Train_Batch_Size=10
 Validation_Percent=0.1
 Save_CheckPoint=True
@@ -26,7 +26,7 @@ writer=SummaryWriter()
 print("GPU status {}".format(Use_GPU))
 
 def adjust_learning_rate(optimizer,epoch):
-    lr=learning_rate*(0.1**(epoch//400))
+    lr=learning_rate*(0.1**(epoch//2))
     for param_group in optimizer.param_groups:
         param_group['lr']=lr
         pass
