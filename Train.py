@@ -55,8 +55,8 @@ def train_net(net,
 
     mTrain,mValid = LiTS_Data.split_to_train_val(mPath.CSVPath + "data.csv", val_percent)
 
-    mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain, classes=classes)
-    mValDataset= LiTS_Data.Dataset_WithLiver(mValid, classes=classes)
+    mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain,  classes=classes,is_train=True,randomize=True)
+    mValDataset= LiTS_Data.Dataset_WithLiver(mValid, classes=classes,is_train=False,randomize=False)
 
     mTrainDataloader=DataLoader(dataset=mTrainDataset,batch_size=batch_size,shuffle=True)
     modeList=[]

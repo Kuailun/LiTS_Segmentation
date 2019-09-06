@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import cv2
 import numpy as np
+import random
 
 def read_in_csv(path):
     if not(os.path.exists(path)):
@@ -60,11 +61,19 @@ def LabelToOnehot(img,classes):
 
     return onehot
 
+def GetRandom(rate):
+    s=random.randint(1,100)
+    if s<rate*100:
+        return True
+    else:
+        return False
 
 class Dataset_WithLiver(Dataset):
-    def __init__(self,data,classes):
+    def __init__(self,data,classes,is_train,randomize):
         self.imgs=data
         self.classes=classes
+        self.is_train=is_train
+        self.randomize=randomize
         pass
 
     def __getitem__(self, index):
@@ -75,19 +84,37 @@ class Dataset_WithLiver(Dataset):
 
         # input=np.zeros((2,img.shape[0],img.shape[1]))
         # input[0, :, :] = img
-        input=img[np.newaxis,:,:]
+
 
         mask=cv2.imread(maskPath)[:,:,0]
 
-        # temp=np.copy(mask)
-        # temp[temp==2]=1
-        #
-        # input[1,:,:]=temp
+        if self.randomize and self.is_train:
+            if (GetRandom(0.1)):
+                # 水平镜像
+                img = cv2.flip(img, 1)
+                mask = cv2.flip(mask, 1)
+                pass
+
+            if (GetRandom(0.1)):
+                # 垂直镜像
+                img = cv2.flip(img, 0)
+                mask = cv2.flip(mask, 0)
+                pass
+
+            if (GetRandom(0.2)):
+                # 旋转90度
+                img = np.rot90(img, 1)
+                mask = np.rot90(mask, 1)
+                pass
+            pass
 
         mask[mask==1]=0
         mask[mask==2]=1
 
+        input = img[np.newaxis, :, :]
+
         mask = LabelToOnehot(mask,self.classes)
+        input=np.ascontiguousarray(input,dtype='float64')
         sample={'img':torch.from_numpy(input),'mask':torch.from_numpy(mask)}
         return sample
 
