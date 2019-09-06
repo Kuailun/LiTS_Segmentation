@@ -16,7 +16,7 @@ Train_Epochs=10
 Train_Batch_Size=10
 Validation_Percent=0.1
 Save_CheckPoint=True
-Output_per_epoch=5
+Output_per_epoch=1
 learning_rate=0.01
 weights=[0,1,0]
 
@@ -192,7 +192,7 @@ def train_net(net,
     pass
 
 if __name__=='__main__':
-    net=UNet(n_channels=1,n_classes=Output_Class)
+    net=ResUnet(n_channels=1,n_classes=Output_Class)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))
 

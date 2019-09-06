@@ -93,8 +93,7 @@ def make_patch(im,patch,resize):
 
     return samples
 
-
-def preprocessing_patch(nii,volume,mask,resize,patch,rate,slices):
+def preprocessing_patch(nii,volume,mask,resize,patch,rate,slices,randomize):
     for i in range(131):
         volumeName='volume-'+str(i)+'.nii'
         segmentName='segmentation-'+str(i)+'.nii'
@@ -142,6 +141,8 @@ def preprocessing_patch(nii,volume,mask,resize,patch,rate,slices):
                     #     save(sub_segment[:, :, ind], mask + 'segmentation-' + str(i) + '/' + str(index) + "-" + str(ind) + '.jpg')
                     continue
                     pass
+                sub_volume=np.array(sub_volume,dtype='uint8')
+                sub_segment=np.array(sub_segment,dtype='uint8')
                 save(sub_volume[:,:,ind], volume + 'volume-' + str(i) + '/' + str(index)+"-"+str(ind) + '.jpg')
                 save(sub_segment[:,:,ind], mask + 'segmentation-' + str(i) + '/' + str(index)+"-"+str(ind) + '.jpg')
                 print("Saving image " + str(i) + " " + str(index)+"-"+str(ind))
@@ -254,7 +255,7 @@ def generate_csv_nii(volume_path, save_folder):
 if __name__=='__main__':
 
     # preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.1, slices=3)
-    preprocessing_patch(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,rate=0.05, slices=3)
+    preprocessing_patch(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,rate=0.05, slices=3, randomize=True)
     generate_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath,"train",shuffle=False)
 
     # preprocessing_patch_predict(mPath.DataPath_Nii,mPath.DataPath_Volume_Predict,mPath.DataPath_Mask_Predict,resize=(128,128),patch=5)

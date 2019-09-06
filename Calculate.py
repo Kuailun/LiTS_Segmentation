@@ -73,8 +73,8 @@ if __name__=='__main__':
         pass
     if(mode==3):
         num=10
-        pair1 = ['E:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-' + str(index + 121) + '-.nii' for index in range(num)]
-        pair2 = ['E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-' + str(index + 121) + '.nii' for index in range(num)]
+        pair1 = ['F:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-' + str(index + 121) + '-.nii' for index in range(num)]
+        pair2 = ['F:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-' + str(index + 121) + '.nii' for index in range(num)]
         overall_dice=0
         items=0
         for i in range(len(pair1)):
