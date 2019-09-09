@@ -19,6 +19,7 @@ Save_CheckPoint=True
 Output_per_epoch=1
 learning_rate=0.01
 weights=[0,1,0]
+Train_Mode='Multi'
 
 writer=SummaryWriter()
 
@@ -53,10 +54,10 @@ def train_net(net,
     # criterion=nn.BCELoss()
     criterion= Loss.MultclassDiceLoss()
 
-    mTrain,mValid = LiTS_Data.split_to_train_val(mPath.CSVPath + "data.csv", val_percent)
+    mTrain,mValid = LiTS_Data.split_to_train_val(mPath.CSVPath + "data.csv", Train_Mode,val_percent)
 
-    mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain,  classes=classes,is_train=True,randomize=True)
-    mValDataset= LiTS_Data.Dataset_WithLiver(mValid, classes=classes,is_train=False,randomize=False)
+    mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain, Train_Mode,classes=classes,is_train=True,randomize=True)
+    mValDataset= LiTS_Data.Dataset_WithLiver(mValid,  Train_Mode, classes=classes,is_train=False,randomize=False)
 
     mTrainDataloader=DataLoader(dataset=mTrainDataset,batch_size=batch_size,shuffle=True)
     modeList=[]
@@ -65,8 +66,6 @@ def train_net(net,
     else:
         mValDataloader = DataLoader(dataset=mValDataset, batch_size=batch_size, shuffle=True)
         modeList = ['train', 'val']
-
-
 
 
     best_acc=0.0
@@ -174,7 +173,14 @@ def train_net(net,
             print('{} Loss:{:.6f} Acc:{:.10f} Dice:{:.10f}'.format(phase,epoch_loss,epoch_acc,epoch_dice))
             # writer.add_scalars('scalar/epoch_data', {'epoch_loss': epoch_loss, 'epoch_acc': epoch_acc},
             #                    epoch)
-
+            if (phase == 'train'):
+                writer.add_scalar('epoch_train_loss', epoch_loss, epoch)
+                writer.add_scalar('epoch_train_acc', epoch_acc, epoch)
+                writer.add_scalar('epoch_train_dice', epoch_dice, epoch)
+            elif (phase == 'val'):
+                writer.add_scalar('epoch_val_loss', epoch_loss, epoch)
+                writer.add_scalar('epoch_val_acc', epoch_acc, epoch)
+                writer.add_scalar('epoch_val_dice', epoch_dice, epoch)
 
             if epoch%Output_per_epoch==0:
                 ut.plot_img(img[0,0,:,:], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input",2)
@@ -192,7 +198,7 @@ def train_net(net,
     pass
 
 if __name__=='__main__':
-    net=ResUnet(n_channels=1,n_classes=Output_Class)
+    net=UNet_Yading(n_channels=3,n_classes=Output_Class)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))
 

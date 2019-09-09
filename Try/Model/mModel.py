@@ -78,7 +78,7 @@ class UNet_Yading(nn.Module):
 class ResUnet(nn.Module):
     def __init__(self,n_channels, n_classes):
         super(ResUnet, self).__init__()
-        self.shortcut1 = shortcut(1, 32)
+        self.shortcut1 = shortcut(n_channels, 32)
         self.d_conv1=double_conv(n_channels,32)
         self.pool=nn.MaxPool2d(2)
 
