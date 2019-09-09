@@ -9,6 +9,7 @@ import torch
 import Preprocess as pp
 from medpy.io import load, save
 import nibabel as nib
+import Preprocess as pp
 
 GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
@@ -127,8 +128,83 @@ def predict_nii(net,nii,gpu,name):
     #     pass
     # pass
 
+def predict_layer_multi(net,layer_input,gpu):
+    net.eval()
 
-pass
+    ret_samples=np.zeros((layer_input.shape[0],layer_input.shape[1],layer_input.shape[3]),dtype='float64')
+    for patch in range(layer_input.shape[3]):
+        temp=layer_input[:,:,:,patch]
+        input=np.zeros((layer_input.shape[2],layer_input.shape[0],layer_input.shape[1]))
+        for i in range(temp.shape[2]):
+            input[i,:,:]=temp[:,:,i]
+            pass
+        # cv2.imshow('1', input[1, :, :])
+        # cv2.waitKey(0)
+        input=input[np.newaxis,:,:,:]
+
+        input=torch.from_numpy(input)
+        input=input.type(torch.FloatTensor)
+
+        if gpu:
+            input = input.cuda(0)
+            pass
+        # 只有训练阶段才追踪历史
+        with torch.set_grad_enabled(False):
+
+            output = net(input)
+            _, preds = torch.max(output, 1)
+            ret_samples[:, :, patch] = preds[0, :, :].cpu().numpy()
+            # cv2.imshow('2', ret_samples[:,:,patch])
+            # cv2.waitKey(0)
+            # ut.plot_img(preds[0, :, :], mPath.DataPath_Volume_Predict + "output"+str(patch)+".jpg", 'Output', 2)
+            pass
+        pass
+    preds = ut.Merge_Patches(ret_samples, [512, 512], 5)
+    cv2.imshow('2', preds*127)
+    cv2.waitKey(0)
+    return preds
+
+def predict_nii_multi(net,img1,img2,gpu,name):
+    net.eval()
+
+    img1 = np.array(img1, dtype='float64')
+
+    img1[img1 < -200] = -200
+    img1[img1 > 250] = 250
+    img1 = ((img1 + 200)*255 // 450)
+    img1 = np.array(img1, dtype='uint8')
+    img2 = np.array(img2, dtype='uint8')
+
+    for i in range(img1.shape[2]):
+        img1[:,:,i]=np.flip(img1[:,:,i],0)
+        img1[:, :, i] = np.rot90(img1[:, :, i])
+        img1[:, :, i] = np.rot90(img1[:, :, i])
+        img1[:, :, i] = np.rot90(img1[:, :, i])
+
+    startposition, endposition = pp.getRangImageDepth(img2)
+
+    sub_srcimages = pp.make_multi_patch(img1, (128,128), 5, 3, startposition, endposition)/255
+
+    layers=img1.shape[2]
+    save_nii = np.zeros((img1.shape[0], img1.shape[1], layers), dtype='uint8')
+
+    for ind in range(startposition,endposition+1,1):
+        # ind=startposition+1
+        layer_input=sub_srcimages[:,:,:,(ind-startposition)*25:(ind-startposition)*25+25]
+
+        im= predict_layer_multi(net, layer_input, gpu)
+        im=np.flip(im,0)
+        im = np.rot90(im)
+        im = np.rot90(im)
+        im = np.rot90(im)
+        # cv2.imshow('2', im*127)
+        # cv2.waitKey(0)
+
+        save_nii[:, :, ind]=im
+        print("Predicting {}-{}".format(name, ind))
+    save_nii=np.array(save_nii,dtype='float64')
+    new_img = nib.Nifti1Image(save_nii, affine=np.eye(4))
+    nib.save(new_img, mPath.DataPath_Volume_Predict + name + '-.nii')
 
 if __name__=='__main__':
     # net=UNet_Yading(n_channels=1,n_classes=Output_Class)
@@ -149,7 +225,7 @@ if __name__=='__main__':
     print("Pretrained model loaded")
 
     # mCSV=LiTS_Data.read_in_csv(mPath.CSVPath+"predict.csv")
-    predict_mode = 4  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
+    predict_mode = 3  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
     if predict_mode==1:
         img = cv2.imread('E:/WorkSpace/Python/Data/Data_LiTS/volume/volume-121/252-6.jpg')[:, :, 0]
         img = img / 255
@@ -161,8 +237,10 @@ if __name__=='__main__':
         samples=predict_layer(net,img,Use_GPU)
         pass
     if predict_mode==3:
-        img, img_header = load('E:/WorkSpace/Python/Data/Data_LiTS/Nii/volume-122.nii')
-        nii=predict_nii(net,img,Use_GPU,'volume-122')
+        img, img_header = load('E:/WorkSpace/Python/Data/Data_LiTS/Nii/volume-0.nii')
+        tru,tru_header=load('E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-0.nii')
+        # nii=predict_nii(net,img,Use_GPU,'volume-122')
+        nii=predict_nii_multi(net,img,tru,Use_GPU,'volume-0')
         pass
     if predict_mode==4:
         for i in range(10):

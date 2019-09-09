@@ -175,7 +175,6 @@ def make_multi_patch(im,resize,patch,layer,startposition,endposition):
                 index = index + 1
                 pass
             pass
-
     return samples
 def preprocessing_multi_patch(nii,volume,mask,resize,patch,layer):
     for i in range(131):
@@ -199,7 +198,7 @@ def preprocessing_multi_patch(nii,volume,mask,resize,patch,layer):
         sub_truthimage=make_multi_patch(img2,resize,patch,layer,startposition,endposition)
 
         for ind in range(sub_truthimage.shape[3]):
-            mMaxP = np.max(sub_truthimage[:, :, layer//2+1,ind])
+            mMaxP = np.max(sub_truthimage[:, :, layer//2,ind])
             if not mMaxP == 2:
                 # n=random.randint(1,100)
                 # if(n<rate*100):

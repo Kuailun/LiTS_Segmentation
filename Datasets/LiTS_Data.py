@@ -38,8 +38,12 @@ def split_to_train_val(mCSV,mode,rate,shuffle=False):
             val=np.array(val)
         else:
             if mode=='Multi':
-                train=imgs[0:-4982]
-                val=imgs[-4982:-1]
+                if len(imgs)>5000:
+                    train=imgs[0:-4982]
+                    val=imgs[-4982:-1]
+                else:
+                    train=imgs
+                    val=np.array(val)
             elif mode=='Single':
                 train=imgs[num:-1]
                 val=imgs[0:num]
@@ -165,7 +169,7 @@ class Dataset_WithLiver(Dataset):
                     # cv2.waitKey(0)
                     pass
 
-                if (GetRandom(1)):
+                if (GetRandom(0.2)):
                     # 旋转90度
                     # cv2.imshow('1', input[0,:, :])
                     # cv2.waitKey(0)

@@ -12,11 +12,11 @@ GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
-Train_Epochs=10
+Train_Epochs=300
 Train_Batch_Size=10
 Validation_Percent=0.1
 Save_CheckPoint=True
-Output_per_epoch=1
+Output_per_epoch=10
 learning_rate=0.01
 weights=[0,1,0]
 Train_Mode='Multi'
@@ -27,7 +27,7 @@ writer=SummaryWriter()
 print("GPU status {}".format(Use_GPU))
 
 def adjust_learning_rate(optimizer,epoch):
-    lr=learning_rate*(0.1**(epoch//2))
+    lr=learning_rate*(0.1**(epoch//200))
     for param_group in optimizer.param_groups:
         param_group['lr']=lr
         pass
@@ -198,7 +198,7 @@ def train_net(net,
     pass
 
 if __name__=='__main__':
-    net=UNet_Yading(n_channels=3,n_classes=Output_Class)
+    net=UNet(n_channels=3,n_classes=Output_Class)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))
 

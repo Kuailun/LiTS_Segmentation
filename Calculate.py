@@ -55,7 +55,7 @@ def calculateDice(predicted,original,all=True):
     return overall_dice,ll
 
 
-mode=3
+mode=2
 if __name__=='__main__':
     if(mode==1):
         predicted=fnmatch.filter(os.listdir(mPath.DataPath_Volume_Predict),"*.nii")
@@ -69,7 +69,7 @@ if __name__=='__main__':
             pass
         pass
     if(mode==2):
-        calculateDice("E:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-121-.nii","E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-121.nii",False)
+        calculateDice("E:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-0-.nii","E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-0.nii",False)
         pass
     if(mode==3):
         num=10
