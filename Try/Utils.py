@@ -84,3 +84,23 @@ def Merge_Patches(samples,size,patch):
     ret_samples[ret_samples>=1]=1
 
     return ret_samples
+
+def Merge_Patches_And(samples,size,patch):
+    block_width=samples.shape[0]
+    block_height=samples.shape[1]
+    width=size[0]
+    height=size[1]
+    stride_width = (width - block_width) // (patch - 1)
+    stride_height = (height - block_height) // (patch - 1)
+
+    ret_samples=np.ones(shape=(width,height),dtype=np.uint8)
+    index = 0
+    for x in range(0, width - block_width + 1, stride_width):
+        for y in range(0, height - block_height + 1, stride_height):
+            ret_samples[x:x + block_width, y:y + block_height] = ret_samples[x:x + block_width, y:y + block_height]*samples[:,:,index]
+            index = index + 1
+            pass
+        pass
+    ret_samples[ret_samples>=1]=1
+
+    return ret_samples

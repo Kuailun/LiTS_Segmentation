@@ -72,7 +72,8 @@ def predict_layer(net,layer,gpu):
             pass
         pass
 
-    preds=ut.Merge_Patches(ret_samples,[512,512],5)
+    # preds = ut.Merge_Patches(ret_samples, [512, 512], 5)
+    preds = ut.Merge_Patches_And(ret_samples, [512, 512], 5)
     ut.save_img(preds,mPath.DataPath_Volume_Predict + "output.jpg")
     return preds
 
@@ -159,9 +160,9 @@ def predict_layer_multi(net,layer_input,gpu):
             # ut.plot_img(preds[0, :, :], mPath.DataPath_Volume_Predict + "output"+str(patch)+".jpg", 'Output', 2)
             pass
         pass
-    preds = ut.Merge_Patches(ret_samples, [512, 512], 5)
-    cv2.imshow('2', preds*127)
-    cv2.waitKey(0)
+    preds = ut.Merge_Patches_And(ret_samples, [512, 512], 5)
+    # cv2.imshow('2', preds*127)
+    # cv2.waitKey(0)
     return preds
 
 def predict_nii_multi(net,img1,img2,gpu,name):
@@ -208,7 +209,7 @@ def predict_nii_multi(net,img1,img2,gpu,name):
 
 if __name__=='__main__':
     # net=UNet_Yading(n_channels=1,n_classes=Output_Class)
-    net=torch.load(mPath.DataPath_Net_Final)
+    net=torch.load(mPath.DataPath_Net_Test)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))
 
@@ -225,25 +226,28 @@ if __name__=='__main__':
     print("Pretrained model loaded")
 
     # mCSV=LiTS_Data.read_in_csv(mPath.CSVPath+"predict.csv")
-    predict_mode = 3  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
+    predict_mode = 1  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
     if predict_mode==1:
-        img = cv2.imread('E:/WorkSpace/Python/Data/Data_LiTS/volume/volume-121/252-6.jpg')[:, :, 0]
+        img = cv2.imread('F:\Workspace\python\Data\Data_LiTS/volume/volume-121-1736/0.jpg')[:, :, 0]
         img = img / 255
         mask=predict_patch(net,img,Use_GPU)
         pass
     if predict_mode==2:
-        img=cv2.imread('E:/WorkSpace/Python/Data/Data_LiTS/volume/volume-0/58.jpg')[:,:,0]
+        img=cv2.imread('F:\Workspace\python\Data\Data_LiTS/volume/volume-121-1736/0.jpg')[:,:,0]
         img = img / 255
         samples=predict_layer(net,img,Use_GPU)
         pass
     if predict_mode==3:
-        img, img_header = load('E:/WorkSpace/Python/Data/Data_LiTS/Nii/volume-0.nii')
-        tru,tru_header=load('E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-0.nii')
+        img, img_header = load('F:/WorkSpace/Python/Data/Data_LiTS/Nii/volume-121.nii')
+        tru,tru_header=load('F:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-121.nii')
         # nii=predict_nii(net,img,Use_GPU,'volume-122')
-        nii=predict_nii_multi(net,img,tru,Use_GPU,'volume-0')
+        nii=predict_nii_multi(net,img,tru,Use_GPU,'volume-121')
         pass
     if predict_mode==4:
         for i in range(10):
-            name='volume-'+str(i+121)
-            img,img_header=load(mPath.DataPath_Nii+name+'.nii')
-            nii=predict_nii(net,img,Use_GPU,name)
+            name1='volume-'+str(i+121)
+            name2 = 'segmentation-' + str(i + 121)
+            img,img_header=load(mPath.DataPath_Nii+name1+'.nii')
+            tru,tru_header=load(mPath.DataPath_Nii+name2+'.nii')
+            # nii=predict_nii(net,img,Use_GPU,name1)
+            nii=predict_nii_multi(net,img,tru,Use_GPU,name1)

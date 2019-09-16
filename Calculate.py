@@ -17,7 +17,7 @@ def dice_cofficient(truth,output,layer=1):
     if not (dice>=0 and dice<=1):
         print(d4)
     return dice
-def calculateDice(predicted,original,all=True):
+def calculateDice(predicted,original,all=True,withGroundTruth=True):
     img1, img_header1 = load(predicted)
     img2, img_header2 = load(original)
     layers=img1.shape[2]
@@ -31,7 +31,8 @@ def calculateDice(predicted,original,all=True):
         mask=img2_layer.copy()
         mask[mask==2]=1
 
-        img1_layer=img1_layer*mask
+        if withGroundTruth:
+            img1_layer=img1_layer*mask
 
         truth=img2_layer.copy()
         truth[truth==1]=0
@@ -55,7 +56,7 @@ def calculateDice(predicted,original,all=True):
     return overall_dice,ll
 
 
-mode=2
+mode=3
 if __name__=='__main__':
     if(mode==1):
         predicted=fnmatch.filter(os.listdir(mPath.DataPath_Volume_Predict),"*.nii")
@@ -69,7 +70,7 @@ if __name__=='__main__':
             pass
         pass
     if(mode==2):
-        calculateDice("E:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-0-.nii","E:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-0.nii",False)
+        calculateDice("F:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-121-.nii","F:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-121.nii",False)
         pass
     if(mode==3):
         num=10
@@ -77,10 +78,13 @@ if __name__=='__main__':
         pair2 = ['F:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-' + str(index + 121) + '.nii' for index in range(num)]
         overall_dice=0
         items=0
+        average_dice=0
         for i in range(len(pair1)):
-            temp_o,temp_i=calculateDice(pair1[i],pair2[i],False)
+            temp_o,temp_i=calculateDice(pair1[i],pair2[i],False,True)
             overall_dice=overall_dice+temp_o
             items=items+temp_i
+            average_dice=average_dice+temp_o/temp_i
             pass
 
-        print('验证集dice='+str(overall_dice/items))
+        print('验证集dice(per frame)='+str(overall_dice/items))
+        print('验证集dice(per case)=' + str(average_dice/len(pair1)))

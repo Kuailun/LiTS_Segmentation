@@ -346,7 +346,7 @@ if __name__=='__main__':
     # generate_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath, "train", shuffle=False)
 
     # 生成多层patch图
-    # preprocessing_multi_patch(mPath.DataPath_Nii,mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,layer=3)
+    preprocessing_multi_patch(mPath.DataPath_Nii,mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=7,layer=3)
     generate_multi_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath, shuffle=False)
 
 
