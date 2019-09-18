@@ -101,6 +101,6 @@ def Merge_Patches_And(samples,size,patch):
             index = index + 1
             pass
         pass
-    ret_samples[ret_samples>=1]=1
+    ret_samples[ret_samples>=1]=2
 
     return ret_samples

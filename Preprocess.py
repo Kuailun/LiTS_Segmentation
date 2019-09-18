@@ -176,6 +176,7 @@ def make_multi_patch(im,resize,patch,layer,startposition,endposition):
                 pass
             pass
     return samples
+
 def preprocessing_multi_patch(nii,volume,mask,resize,patch,layer):
     for i in range(131):
         volumeName='volume-'+str(i)+'.nii'

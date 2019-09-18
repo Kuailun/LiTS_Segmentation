@@ -79,12 +79,16 @@ if __name__=='__main__':
         overall_dice=0
         items=0
         average_dice=0
+        score_history=[]
         for i in range(len(pair1)):
             temp_o,temp_i=calculateDice(pair1[i],pair2[i],False,True)
             overall_dice=overall_dice+temp_o
             items=items+temp_i
             average_dice=average_dice+temp_o/temp_i
+            score_history.append(temp_o/temp_i)
             pass
 
         print('验证集dice(per frame)='+str(overall_dice/items))
         print('验证集dice(per case)=' + str(average_dice/len(pair1)))
+        pass
+    print(score_history)

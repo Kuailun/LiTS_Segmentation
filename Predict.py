@@ -161,11 +161,12 @@ def predict_layer_multi(net,layer_input,gpu):
             pass
         pass
     preds = ut.Merge_Patches_And(ret_samples, [512, 512], 5)
+    preds[preds>0]=2
     # cv2.imshow('2', preds*127)
     # cv2.waitKey(0)
     return preds
 
-def predict_nii_multi(net,img1,img2,gpu,name):
+def predict_nii_multi(net,img1,img2,gpu,name,is_test=False):
     net.eval()
 
     img1 = np.array(img1, dtype='float64')
@@ -174,38 +175,73 @@ def predict_nii_multi(net,img1,img2,gpu,name):
     img1[img1 > 250] = 250
     img1 = ((img1 + 200)*255 // 450)
     img1 = np.array(img1, dtype='uint8')
-    img2 = np.array(img2, dtype='uint8')
 
-    for i in range(img1.shape[2]):
-        img1[:,:,i]=np.flip(img1[:,:,i],0)
-        img1[:, :, i] = np.rot90(img1[:, :, i])
-        img1[:, :, i] = np.rot90(img1[:, :, i])
-        img1[:, :, i] = np.rot90(img1[:, :, i])
+    if not is_test:
+        img2 = np.array(img2, dtype='uint8')
 
-    startposition, endposition = pp.getRangImageDepth(img2)
+        for i in range(img1.shape[2]):
+            img1[:,:,i]=np.flip(img1[:,:,i],0)
+            img1[:, :, i] = np.rot90(img1[:, :, i])
+            img1[:, :, i] = np.rot90(img1[:, :, i])
+            img1[:, :, i] = np.rot90(img1[:, :, i])
 
-    sub_srcimages = pp.make_multi_patch(img1, (128,128), 5, 3, startposition, endposition)/255
+        startposition, endposition = pp.getRangImageDepth(img2)
 
-    layers=img1.shape[2]
-    save_nii = np.zeros((img1.shape[0], img1.shape[1], layers), dtype='uint8')
+        sub_srcimages = pp.make_multi_patch(img1, (128,128), 5, 3, startposition, endposition)/255
 
-    for ind in range(startposition,endposition+1,1):
-        # ind=startposition+1
-        layer_input=sub_srcimages[:,:,:,(ind-startposition)*25:(ind-startposition)*25+25]
+        layers=img1.shape[2]
+        save_nii = np.zeros((img1.shape[0], img1.shape[1], layers), dtype='uint8')
 
-        im= predict_layer_multi(net, layer_input, gpu)
-        im=np.flip(im,0)
-        im = np.rot90(im)
-        im = np.rot90(im)
-        im = np.rot90(im)
-        # cv2.imshow('2', im*127)
-        # cv2.waitKey(0)
+        for ind in range(startposition,endposition+1,1):
+            # ind=startposition+1
+            layer_input=sub_srcimages[:,:,:,(ind-startposition)*25:(ind-startposition)*25+25]
 
-        save_nii[:, :, ind]=im
-        print("Predicting {}-{}".format(name, ind))
-    save_nii=np.array(save_nii,dtype='float64')
+            im= predict_layer_multi(net, layer_input, gpu)
+            im=np.flip(im,0)
+            im = np.rot90(im)
+            im = np.rot90(im)
+            im = np.rot90(im)
+            # cv2.imshow('2', im*127)
+            # cv2.waitKey(0)
+
+            save_nii[:, :, ind]=im
+            print("Predicting {}-{}".format(name, ind))
+            pass
+        pass
+    else:
+        for i in range(img1.shape[2]):
+            img1[:, :, i] = np.flip(img1[:, :, i], 0)
+            img1[:, :, i] = np.rot90(img1[:, :, i])
+            img1[:, :, i] = np.rot90(img1[:, :, i])
+            img1[:, :, i] = np.rot90(img1[:, :, i])
+
+        startposition=1
+        endposition=img1.shape[2]-2
+
+        sub_srcimages = pp.make_multi_patch(img1, (128, 128), 5, 3, startposition, endposition) / 255
+
+        layers = img1.shape[2]
+        save_nii = np.zeros((img1.shape[0], img1.shape[1], layers), dtype='uint8')
+
+        for ind in range(startposition, endposition + 1, 1):
+            # ind=startposition+1
+            layer_input = sub_srcimages[:, :, :, (ind - startposition) * 25:(ind - startposition) * 25 + 25]
+
+            im = predict_layer_multi(net, layer_input, gpu)
+            im = np.flip(im, 0)
+            im = np.rot90(im)
+            im = np.rot90(im)
+            im = np.rot90(im)
+            # cv2.imshow('2', im*127)
+            # cv2.waitKey(0)
+
+            save_nii[:, :, ind] = im
+            print("Predicting {}-{}".format(name, ind))
+            pass
+        pass
+    save_nii=np.array(save_nii,dtype='uint8')
     new_img = nib.Nifti1Image(save_nii, affine=np.eye(4))
-    nib.save(new_img, mPath.DataPath_Volume_Predict + name + '-.nii')
+    nib.save(new_img, mPath.DataPath_Volume_Predict + name + '.nii')
 
 if __name__=='__main__':
     # net=UNet_Yading(n_channels=1,n_classes=Output_Class)
@@ -226,7 +262,7 @@ if __name__=='__main__':
     print("Pretrained model loaded")
 
     # mCSV=LiTS_Data.read_in_csv(mPath.CSVPath+"predict.csv")
-    predict_mode = 1  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
+    predict_mode = 5  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
     if predict_mode==1:
         img = cv2.imread('F:\Workspace\python\Data\Data_LiTS/volume/volume-121-1736/0.jpg')[:, :, 0]
         img = img / 255
@@ -250,4 +286,12 @@ if __name__=='__main__':
             img,img_header=load(mPath.DataPath_Nii+name1+'.nii')
             tru,tru_header=load(mPath.DataPath_Nii+name2+'.nii')
             # nii=predict_nii(net,img,Use_GPU,name1)
-            nii=predict_nii_multi(net,img,tru,Use_GPU,name1)
+            nii=predict_nii_multi(net,img,tru,Use_GPU,'test-segmentation-'+str(i)+'.nii',False)
+            pass
+        pass
+    if predict_mode==5:#for test only
+        for i in range(68,70,1):
+            name1='test-volume-'+str(i)+'.nii'
+            name2='test-segmentation-'+str(i)+'.nii'
+            img, img_header = load(mPath.DataPath_Nii_Predict + name1)
+            nii = predict_nii_multi(net, img, img, Use_GPU, 'test-segmentation-' + str(i),True)
