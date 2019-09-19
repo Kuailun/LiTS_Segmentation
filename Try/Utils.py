@@ -22,6 +22,7 @@ def plot_img(img,path,type,classes):
     if type=="Input":
         img=img.cpu()
         img=img.numpy()*255
+        img=np.array(img,dtype='uint8')
         cv2.imwrite(path,img)
         pass
     elif type=="Output":

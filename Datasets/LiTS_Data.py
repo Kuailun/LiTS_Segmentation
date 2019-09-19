@@ -45,8 +45,9 @@ def split_to_train_val(mCSV,mode,rate,shuffle=False):
                     train=imgs
                     val=np.array(val)
             elif mode=='Single':
-                train=imgs[num:-1]
-                val=imgs[0:num]
+                num=20990
+                val=imgs[num:-1]
+                train=imgs[0:num]
         print("Dataset Initialization finished: Train {0}, Val {1}".format(train.shape[0], val.shape[0]))
         pass
 
@@ -199,3 +200,74 @@ class Dataset_WithLiver(Dataset):
 
     def __len__(self):
         return self.imgs.shape[0]
+
+    pass
+
+
+class Dataset_Liver(Dataset):
+    def __init__(self, data, is_train, randomize):
+        self.imgs = data
+        self.is_train = is_train
+        self.randomize = randomize
+        pass
+
+    def __getitem__(self, index):
+
+        imgPath, maskPath = self.imgs[index]
+        img = cv2.imread(imgPath)[:, :, 0]
+        img = img / 255
+
+        mask = cv2.imread(maskPath)[:, :, 0]
+
+        if self.randomize and self.is_train:
+            if (GetRandom(0.1)):
+                # 水平镜像
+                img = cv2.flip(img, 1)
+                mask = cv2.flip(mask, 1)
+                pass
+
+            if (GetRandom(0.1)):
+                # 垂直镜像
+                img = cv2.flip(img, 0)
+                mask = cv2.flip(mask, 0)
+                pass
+
+            if (GetRandom(0.2)):
+                # 旋转90度
+                img = np.rot90(img, 1)
+                mask = np.rot90(mask, 1)
+                pass
+
+            if (GetRandom(0.1)):
+                # 调整图像亮度
+                rate=random.randint(87,107)
+                img=img*rate/100
+                img[img>1.0]=1.0
+            pass
+
+        mask[mask == 2] = 1
+
+        # cv2.imshow('1', img)
+        # cv2.waitKey(0)
+
+        input=cv2.resize(img,(256,256))
+        mask=cv2.resize(mask,(256,256))
+
+        inpu=np.zeros((3,256,256),dtype='float64')
+        inpu[0,:,:]=input
+        inpu[1,:,:]=input
+        inpu[2,:,:]=input
+        # input = inpu[np.newaxis, :, :]
+
+        input=inpu
+
+
+        mask = LabelToOnehot(mask, 2)
+        input = np.ascontiguousarray(input, dtype='float64')
+        sample = {'img': torch.from_numpy(input), 'mask': torch.from_numpy(mask)}
+        return sample
+
+    def __len__(self):
+        return self.imgs.shape[0]
+
+    pass

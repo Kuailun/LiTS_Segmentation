@@ -77,6 +77,51 @@ def predict_layer(net,layer,gpu):
     ut.save_img(preds,mPath.DataPath_Volume_Predict + "output.jpg")
     return preds
 
+def predict_liver(img,gpu):
+    net.eval()
+    img=img[np.newaxis,np.newaxis,:,:]
+    img=torch.from_numpy(img)
+
+    img=img.float()
+    if gpu:
+        img=img.cuda(0)
+        pass
+
+    with torch.set_grad_enabled(False):
+        output=net(img)
+        _,preds=torch.max(output,1)
+        pass
+
+    return preds[0,:,:].cpu().numpy()
+def predict_liverNii(net,nii,gpu,name):
+    net.eval()
+    nii = np.array(nii, dtype='float64')
+    nii[nii < -200] = -200
+    nii[nii > 250] = 250
+    nii = ((nii + 200)/ 450)
+
+    layer=nii.shape[2]
+    ut.CheckDirectory(mPath.DataPath_Volume_Predict+'temp/')
+
+    output_layer=np.zeros_like(nii)
+    for i in range(layer):
+        current_layer=np.flip(nii[:,:,i],0)
+        current_layer = np.rot90(current_layer)
+        current_layer = np.rot90(current_layer)
+        current_layer = np.rot90(current_layer)
+        print("Predicting {}-{}".format(name, i))
+        temp=predict_liver(current_layer,gpu)
+        temp = np.flip(temp, 0)
+        temp = np.rot90(temp)
+        temp = np.rot90(temp)
+        temp = np.rot90(temp)
+        output_layer[:, :, i]=temp
+
+    output_layer=np.array(output_layer,dtype='uint8')
+    new_img = nib.Nifti1Image(output_layer, affine=np.eye(4))
+    nib.save(new_img, mPath.DataPath_Volume_Predict + name + '.nii')
+
+
 def predict_nii(net,nii,gpu,name):
     net.eval()
     nii=np.array(nii,dtype='float64')
@@ -262,7 +307,7 @@ if __name__=='__main__':
     print("Pretrained model loaded")
 
     # mCSV=LiTS_Data.read_in_csv(mPath.CSVPath+"predict.csv")
-    predict_mode = 5  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
+    predict_mode = 6  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
     if predict_mode==1:
         img = cv2.imread('F:\Workspace\python\Data\Data_LiTS/volume/volume-121-1736/0.jpg')[:, :, 0]
         img = img / 255
@@ -295,3 +340,11 @@ if __name__=='__main__':
             name2='test-segmentation-'+str(i)+'.nii'
             img, img_header = load(mPath.DataPath_Nii_Predict + name1)
             nii = predict_nii_multi(net, img, img, Use_GPU, 'test-segmentation-' + str(i),True)
+            pass
+        pass
+    if predict_mode==6:
+        for i in range(0,70,1):
+            name1='test-volume-'+str(i)+'.nii'
+            name2='test-liver-'+str(i)+'.nii'
+            img,img_header=load(mPath.DataPath_Nii_Predict+name1)
+            nii=predict_liverNii(net,img,Use_GPU,'test-liver-'+str(i))

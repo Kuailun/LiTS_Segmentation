@@ -12,14 +12,14 @@ GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
-Train_Epochs=10
-Train_Batch_Size=10
+Train_Epochs=5
+Train_Batch_Size=4
 Validation_Percent=0.1
 Save_CheckPoint=True
 Output_per_epoch=1
 learning_rate=0.01
 weights=[0,1,0]
-Train_Mode='Multi'
+Train_Mode='Single'
 
 writer=SummaryWriter()
 
@@ -27,7 +27,7 @@ writer=SummaryWriter()
 print("GPU status {}".format(Use_GPU))
 
 def adjust_learning_rate(optimizer,epoch):
-    lr=learning_rate*(0.1**(epoch//2))
+    lr=learning_rate*(0.1**(epoch//1))
     for param_group in optimizer.param_groups:
         param_group['lr']=lr
         pass
@@ -56,8 +56,10 @@ def train_net(net,
 
     mTrain,mValid = LiTS_Data.split_to_train_val(mPath.CSVPath + "data.csv", Train_Mode,val_percent)
 
-    mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain, Train_Mode,classes=classes,is_train=True,randomize=True)
-    mValDataset= LiTS_Data.Dataset_WithLiver(mValid,  Train_Mode, classes=classes,is_train=False,randomize=False)
+    # mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain, Train_Mode,classes=classes,is_train=True,randomize=True)
+    # mValDataset= LiTS_Data.Dataset_WithLiver(mValid,  Train_Mode, classes=classes,is_train=False,randomize=False)
+    mTrainDataset = LiTS_Data.Dataset_Liver(mTrain, is_train=True, randomize=True)
+    mValDataset = LiTS_Data.Dataset_Liver(mValid, is_train=False, randomize=False)
 
     mTrainDataloader=DataLoader(dataset=mTrainDataset,batch_size=batch_size,shuffle=True)
     modeList=[]
@@ -158,7 +160,9 @@ def train_net(net,
                     writer.add_scalar('val_acc', subaccTotal, iter_val)
                     writer.add_scalar('val_dice', sub_dice, iter_val)
                     iter_val += 1
-
+                # ut.plot_img(img[0, 0, :, :], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input", 2)
+                # ut.plot_img(mask[0, :, :, :], mPath.DataPath_Log + "Mask0-" + str(epoch) + ".jpg", "Mask", 2)
+                # ut.plot_img(preds[0, :, :], mPath.DataPath_Log + "Output0-" + str(epoch) + ".jpg", "Output", 2)
                 print('{} Loss:{:.6f} Acc:{:.10f} Dice:{:.10f}'.format(index, subloss, subaccTotal,sub_dice))
                 pass
             if not (dataLength==0):
@@ -198,7 +202,8 @@ def train_net(net,
     pass
 
 if __name__=='__main__':
-    net=ResUnet(n_channels=3,n_classes=Output_Class)
+    # net=UNet_Yading(n_channels=1,n_classes=Output_Class)
+    net=torch.hub.load('mateuszbuda/brain-segmentation-pytorch','unet',in_channels=3,out_channels=1,init_features=32,pretrained=True)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))
 
