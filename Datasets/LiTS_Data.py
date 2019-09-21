@@ -5,6 +5,7 @@ import os
 import cv2
 import numpy as np
 import random
+import torchvision
 
 def read_in_csv(path):
     if not(os.path.exists(path)):
@@ -238,11 +239,11 @@ class Dataset_Liver(Dataset):
                 mask = np.rot90(mask, 1)
                 pass
 
-            if (GetRandom(0.1)):
-                # 调整图像亮度
-                rate=random.randint(87,107)
-                img=img*rate/100
-                img[img>1.0]=1.0
+            # if (GetRandom(0.1)):
+            #     # 调整图像亮度
+            #     rate=random.randint(87,107)
+            #     img=img*rate/100
+            #     img[img>1.0]=1.0
             pass
 
         mask[mask == 2] = 1
@@ -253,18 +254,18 @@ class Dataset_Liver(Dataset):
         input=cv2.resize(img,(256,256))
         mask=cv2.resize(mask,(256,256))
 
-        inpu=np.zeros((3,256,256),dtype='float64')
-        inpu[0,:,:]=input
-        inpu[1,:,:]=input
-        inpu[2,:,:]=input
-        # input = inpu[np.newaxis, :, :]
+        # inpu=np.zeros((3,256,256),dtype='float64')
+        # inpu[0,:,:]=input
+        # inpu[1,:,:]=input
+        # inpu[2,:,:]=input
+        input = input[np.newaxis, :, :]
 
-        input=inpu
+        # input=inpu
 
 
         mask = LabelToOnehot(mask, 2)
         input = np.ascontiguousarray(input, dtype='float64')
-        sample = {'img': torch.from_numpy(input), 'mask': torch.from_numpy(mask)}
+        sample = {'img': torch.from_numpy(input) , 'mask': torch.from_numpy(mask)}
         return sample
 
     def __len__(self):

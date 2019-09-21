@@ -224,3 +224,80 @@ class shortcut(nn.Module):
     def forward(self, x):
         x=self.run(x)
         return x
+    pass
+
+
+class DecoderBlock(nn.Module):
+    def __init__(self,
+                 in_channels=512,
+                 n_filters=256,
+                 kernel_size=3,
+                 is_deconv=False,
+                 ):
+        super().__init__()
+
+        if kernel_size == 3:
+            conv_padding = 1
+        elif kernel_size == 1:
+            conv_padding = 0
+
+        # B, C, H, W -> B, C/4, H, W
+        self.conv1 = nn.Conv2d(in_channels,
+                               in_channels // 4,
+                               kernel_size,
+                               padding=1, bias=False)
+        self.norm1 = nn.BatchNorm2d(in_channels // 4)
+        self.relu1 = nn.ReLU(inplace=True)
+
+        # B, C/4, H, W -> B, C/4, H, W
+        if is_deconv == True:
+            self.deconv2 = nn.ConvTranspose2d(in_channels // 4,
+                                              in_channels // 4,
+                                              3,
+                                              stride=2,
+                                              padding=1,
+                                              output_padding=conv_padding, bias=False)
+        # else:
+        #     self.deconv2 = nn.Upsample(scale_factor=2, **up_kwargs)
+
+        self.norm2 = nn.BatchNorm2d(in_channels // 4)
+        self.relu2 = nn.ReLU(inplace=True)
+
+        # B, C/4, H, W -> B, C, H, W
+        self.conv3 = nn.Conv2d(in_channels // 4,
+                               n_filters,
+                               kernel_size,
+                               padding=conv_padding, bias=False)
+        self.norm3 = nn.BatchNorm2d(n_filters)
+        self.relu3 = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.norm1(x)
+        x = self.relu1(x)
+        x = self.deconv2(x)
+        x = self.norm2(x)
+        x = self.relu2(x)
+        x = self.conv3(x)
+        x = self.norm3(x)
+        x = self.relu3(x)
+        return x
+
+
+class BasicConv2d(nn.Module):
+    def __init__(self, in_planes, out_planes, kernel_size, stride, padding=0):
+        super(BasicConv2d, self).__init__()
+        self.conv = nn.Conv2d(in_planes, out_planes,
+                              kernel_size=kernel_size, stride=stride,
+                              padding=padding, bias=False)  # verify bias false
+        self.bn = nn.BatchNorm2d(out_planes,
+                                 eps=0.001,  # value found in tensorflow
+                                 momentum=0.1,  # default pytorch value
+                                 affine=True)
+        self.relu = nn.ReLU(inplace=False)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.relu(x)
+        return x

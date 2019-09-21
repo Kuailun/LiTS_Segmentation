@@ -12,11 +12,11 @@ GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
-Train_Epochs=5
+Train_Epochs=500
 Train_Batch_Size=4
 Validation_Percent=0.1
 Save_CheckPoint=True
-Output_per_epoch=1
+Output_per_epoch=5
 learning_rate=0.01
 weights=[0,1,0]
 Train_Mode='Single'
@@ -27,7 +27,7 @@ writer=SummaryWriter()
 print("GPU status {}".format(Use_GPU))
 
 def adjust_learning_rate(optimizer,epoch):
-    lr=learning_rate*(0.1**(epoch//1))
+    lr=learning_rate*(0.1**(epoch//30))
     for param_group in optimizer.param_groups:
         param_group['lr']=lr
         pass
@@ -203,7 +203,8 @@ def train_net(net,
 
 if __name__=='__main__':
     # net=UNet_Yading(n_channels=1,n_classes=Output_Class)
-    net=torch.hub.load('mateuszbuda/brain-segmentation-pytorch','unet',in_channels=3,out_channels=1,init_features=32,pretrained=True)
+    net=ResUnet34(n_channels=1,n_classes=Output_Class)
+    # net=torch.hub.load('mateuszbuda/brain-segmentation-pytorch','unet',in_channels=3,out_channels=1,init_features=32,pretrained=True)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))
 

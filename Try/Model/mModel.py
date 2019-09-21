@@ -1,4 +1,5 @@
 from Try.Model.Utils import *
+from torchvision import models
 
 class UNet(nn.Module):
     def __init__(self,n_channels,n_classes):
@@ -130,6 +131,57 @@ class ResUnet(nn.Module):
         x = torch.sigmoid(x)
         return x  # 进行二分类
 
+class ResUnet34(nn.Module):
+    def __init__(self,n_channels, n_classes):
+        super(ResUnet34,self).__init__()
+
+        self.base_model=models.resnet50(pretrained=True)
+        self.base_layers=list(self.base_model.children())
+        filters=[64,256,512,1024,2048]
+
+        self.firstconv=nn.Conv2d(n_channels,64,kernel_size=(7,7),stride=(2,2),padding=(3,3),bias=False)
+        self.firstbn=self.base_model.bn1
+        self.firstrelu=self.base_model.relu
+        self.firstmaxpool=self.base_model.maxpool
+        self.encoder1 = self.base_model.layer1
+        self.encoder2 = self.base_model.layer2
+        self.encoder3 = self.base_model.layer3
+        self.encoder4 = self.base_model.layer4
+
+        self.center = DecoderBlock(in_channels=filters[4], n_filters=filters[4], kernel_size=3, is_deconv=True)
+        self.decoder4 = DecoderBlock(in_channels=filters[4]+filters[3], n_filters=filters[3], kernel_size=3, is_deconv=True)
+        self.decoder3 = DecoderBlock(in_channels=filters[3]+filters[2], n_filters=filters[2], kernel_size=3, is_deconv=True)
+        self.decoder2 = DecoderBlock(in_channels=filters[2]+filters[1], n_filters=filters[1], kernel_size=3, is_deconv=True)
+        self.decoder1 = DecoderBlock(in_channels=filters[0] + filters[1], n_filters=filters[1], kernel_size=3, is_deconv=True)
+
+        self.finalconv=nn.Sequential(nn.Conv2d(filters[1],32,3,padding=1,bias=False),
+                                     nn.BatchNorm2d(32),
+                                     nn.ReLU(),
+                                     nn.Dropout2d(0.1,False),
+                                     nn.Conv2d(32,n_classes,1))
+        pass
+
+    def forward(self,x):
+        x=self.firstconv(x)
+        x=self.firstbn(x)
+        x=self.firstrelu(x)
+        x_=self.firstmaxpool(x)
+
+        e1=self.encoder1(x_)
+        e2=self.encoder2(e1)
+        e3=self.encoder3(e2)
+        e4=self.encoder4(e3)
+
+        center=self.center(e4)
+
+        d4 = self.decoder4(torch.cat([center, e3], 1))
+        d3 = self.decoder3(torch.cat([d4, e2], 1))
+        d2 = self.decoder2(torch.cat([d3, e1], 1))
+        d1 = self.decoder1(torch.cat([d2, x], 1))
+
+        f=self.finalconv(d1)
+        f=torch.sigmoid(f)
+        return f
 
 
 
