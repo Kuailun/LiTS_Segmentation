@@ -12,11 +12,11 @@ GPU_DEVICES='0'
 os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
-Train_Epochs=500
+Train_Epochs=10
 Train_Batch_Size=4
 Validation_Percent=0.1
 Save_CheckPoint=True
-Output_per_epoch=5
+Output_per_epoch=1
 learning_rate=0.01
 weights=[0,1,0]
 Train_Mode='Single'
@@ -27,7 +27,7 @@ writer=SummaryWriter()
 print("GPU status {}".format(Use_GPU))
 
 def adjust_learning_rate(optimizer,epoch):
-    lr=learning_rate*(0.1**(epoch//30))
+    lr=learning_rate*(0.1**(epoch//2))
     for param_group in optimizer.param_groups:
         param_group['lr']=lr
         pass
@@ -56,10 +56,10 @@ def train_net(net,
 
     mTrain,mValid = LiTS_Data.split_to_train_val(mPath.CSVPath + "data.csv", Train_Mode,val_percent)
 
-    # mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain, Train_Mode,classes=classes,is_train=True,randomize=True)
-    # mValDataset= LiTS_Data.Dataset_WithLiver(mValid,  Train_Mode, classes=classes,is_train=False,randomize=False)
-    mTrainDataset = LiTS_Data.Dataset_Liver(mTrain, is_train=True, randomize=True)
-    mValDataset = LiTS_Data.Dataset_Liver(mValid, is_train=False, randomize=False)
+    mTrainDataset= LiTS_Data.Dataset_WithLiver(mTrain, Train_Mode,classes=classes,is_train=True,randomize=True)
+    mValDataset= LiTS_Data.Dataset_WithLiver(mValid,  Train_Mode, classes=classes,is_train=False,randomize=False)
+    # mTrainDataset = LiTS_Data.Dataset_Liver(mTrain, is_train=True, randomize=True)
+    # mValDataset = LiTS_Data.Dataset_Liver(mValid, is_train=False, randomize=False)
 
     mTrainDataloader=DataLoader(dataset=mTrainDataset,batch_size=batch_size,shuffle=True)
     modeList=[]
@@ -202,8 +202,8 @@ def train_net(net,
     pass
 
 if __name__=='__main__':
-    # net=UNet_Yading(n_channels=1,n_classes=Output_Class)
-    net=ResUnet34(n_channels=1,n_classes=Output_Class)
+    net=ResUnet(n_channels=1,n_classes=Output_Class)
+    # net=ResUnet34(n_channels=1,n_classes=Output_Class)
     # net=torch.hub.load('mateuszbuda/brain-segmentation-pytorch','unet',in_channels=3,out_channels=1,init_features=32,pretrained=True)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))

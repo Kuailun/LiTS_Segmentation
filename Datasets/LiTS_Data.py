@@ -46,7 +46,7 @@ def split_to_train_val(mCSV,mode,rate,shuffle=False):
                     train=imgs
                     val=np.array(val)
             elif mode=='Single':
-                num=20990
+                num=16930
                 val=imgs[num:-1]
                 train=imgs[0:num]
         print("Dataset Initialization finished: Train {0}, Val {1}".format(train.shape[0], val.shape[0]))
@@ -92,6 +92,7 @@ class Dataset_WithLiver(Dataset):
         if self.train_mode=='Single':
             imgPath,maskPath=self.imgs[index]
             img=cv2.imread(imgPath)[:,:,0]
+            img=np.array(img,dtype='float64')
             img=img/255
 
             mask=cv2.imread(maskPath)[:,:,0]
@@ -115,6 +116,10 @@ class Dataset_WithLiver(Dataset):
                     mask = np.rot90(mask, 1)
                     pass
                 pass
+            ma=np.copy(mask)
+            ma[mask==2]=1
+            ma=np.array(ma,dtype='float64')
+            img=img*ma
 
             mask[mask==1]=0
             mask[mask==2]=1

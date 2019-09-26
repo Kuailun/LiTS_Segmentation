@@ -30,7 +30,7 @@ def getRangImageDepth(image):
     return startposition, endposition
 
 def preprocessing_filter(nii,volume,mask,resize,rate,slices):
-    for i in range(131):
+    for i in range(0,131,1):
         volumeName='volume-'+str(i)+'.nii'
         segmentName='segmentation-'+str(i)+'.nii'
 
@@ -44,11 +44,14 @@ def preprocessing_filter(nii,volume,mask,resize,rate,slices):
         img1, img_header1 = load(nii + volumeName)
         img2, img_header2 = load(nii + segmentName)
 
+        img1=np.array(img1,dtype='float64')
+
         img1[img1<-200]=-200
         img1[img1>250]=250
         img1=((img1+200)*255//450)
         img1=np.array(img1,dtype='uint8')
         img2=np.array(img2,dtype='uint8')
+
 
         startposition,endposition=getRangImageDepth(img2)
 
@@ -340,7 +343,7 @@ if __name__=='__main__':
     ut.CheckDirectory(mPath.DataPath_Volume)
     ut.CheckDirectory(mPath.DataPath_Mask)
     # 生成完整图
-    # preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.05, slices=1)
+    preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.05, slices=1)
 
     # 生成单层patch图
     # preprocessing_patch(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,randomize=True)

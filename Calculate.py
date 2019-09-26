@@ -35,14 +35,17 @@ def calculateDice(predicted,original,all=True,withGroundTruth=True):
             img1_layer=img1_layer*mask
 
         truth=img2_layer.copy()
-        truth[truth==1]=0
-        truth[truth>0]=1
+        truth[truth==2]=1
+        # truth[truth==1]=0
+        # truth[truth>0]=1
 
         dice_score=dice_cofficient(truth,img1_layer,1)
-
+        if dice_score>1:
+            print('here')
         if all:
             overall_dice=overall_dice+dice_score
             ll=ll+1
+            print(str(layer) + '-' + str(dice_score))
         else:
             if(np.sum(truth)>0):
                 overall_dice = overall_dice + dice_score
@@ -74,14 +77,14 @@ if __name__=='__main__':
         pass
     if(mode==3):
         num=10
-        pair1 = ['F:/WorkSpace/Python/Data/Data_LiTS/volume_predict/volume-' + str(index + 121) + '-.nii' for index in range(num)]
+        pair1 = ['F:/WorkSpace/Python/Data/Data_LiTS/volume_predict/outer-' + str(index + 121) + '.nii' for index in range(num)]
         pair2 = ['F:/WorkSpace/Python/Data/Data_LiTS/Nii/segmentation-' + str(index + 121) + '.nii' for index in range(num)]
         overall_dice=0
         items=0
         average_dice=0
         score_history=[]
         for i in range(len(pair1)):
-            temp_o,temp_i=calculateDice(pair1[i],pair2[i],False,True)
+            temp_o,temp_i=calculateDice(pair1[i],pair2[i],True,False)
             overall_dice=overall_dice+temp_o
             items=items+temp_i
             average_dice=average_dice+temp_o/temp_i
