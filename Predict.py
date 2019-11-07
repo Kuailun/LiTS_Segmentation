@@ -307,7 +307,7 @@ if __name__=='__main__':
     print("Pretrained model loaded")
 
     # mCSV=LiTS_Data.read_in_csv(mPath.CSVPath+"predict.csv")
-    predict_mode = 6  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
+    predict_mode = 5  # 1-预测一个patch, #2-预测一个layer, #3-预测一个nii
     if predict_mode==1:
         img = cv2.imread('F:\Workspace\python\Data\Data_LiTS/volume/volume-121-1736/0.jpg')[:, :, 0]
         img = img / 255
@@ -331,15 +331,15 @@ if __name__=='__main__':
             img,img_header=load(mPath.DataPath_Nii+name1+'.nii')
             tru,tru_header=load(mPath.DataPath_Nii+name2+'.nii')
             # nii=predict_nii(net,img,Use_GPU,name1)
-            nii=predict_nii_multi(net,img,tru,Use_GPU,'test-segmentation-'+str(i)+'.nii',False)
+            nii=predict_nii_multi(net,img,tru,Use_GPU,'test-tumor-'+str(i+121)+'.nii',False)
             pass
         pass
     if predict_mode==5:#for test only
-        for i in range(68,70,1):
+        for i in range(41,70,1):
             name1='test-volume-'+str(i)+'.nii'
             name2='test-segmentation-'+str(i)+'.nii'
             img, img_header = load(mPath.DataPath_Nii_Predict + name1)
-            nii = predict_nii_multi(net, img, img, Use_GPU, 'test-segmentation-' + str(i),True)
+            nii = predict_nii_multi(net, img, img, Use_GPU, 'test-tumor-' + str(i),True)
             pass
         pass
     if predict_mode==6:

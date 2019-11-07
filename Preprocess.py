@@ -343,15 +343,12 @@ if __name__=='__main__':
     ut.CheckDirectory(mPath.DataPath_Volume)
     ut.CheckDirectory(mPath.DataPath_Mask)
     # 生成完整图
-    preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.05, slices=1)
+    # preprocessing_filter(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(512, 512), rate=0.05, slices=1)
 
     # 生成单层patch图
-    # preprocessing_patch(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,randomize=True)
-    generate_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath, "train", shuffle=True)
+    # preprocessing_patch(mPath.DataPath_Nii, mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,randomize=False)
+    # generate_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath, "train", shuffle=True)
 
     # 生成多层patch图
-    # preprocessing_multi_patch(mPath.DataPath_Nii,mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=7,layer=3)
-    # generate_multi_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath, shuffle=False)
-
-
-
+    preprocessing_multi_patch(mPath.DataPath_Nii,mPath.DataPath_Volume, mPath.DataPath_Mask, resize=(128, 128), patch=5,layer=3)
+    generate_multi_csv(mPath.DataPath_Mask, mPath.DataPath_Volume, mPath.CSVPath, shuffle=False)

@@ -13,13 +13,13 @@ os.environ["CUDA_VISIBLE_DEVICES"]=GPU_DEVICES
 Use_GPU=torch.cuda.is_available()
 Output_Class=2
 Train_Epochs=10
-Train_Batch_Size=4
+Train_Batch_Size=8
 Validation_Percent=0.1
 Save_CheckPoint=True
 Output_per_epoch=1
 learning_rate=0.01
 weights=[0,1,0]
-Train_Mode='Single'
+Train_Mode='Multi'
 
 writer=SummaryWriter()
 
@@ -187,7 +187,7 @@ def train_net(net,
                 writer.add_scalar('epoch_val_dice', epoch_dice, epoch)
 
             if epoch%Output_per_epoch==0:
-                ut.plot_img(img[0,0,:,:], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input",2)
+                ut.plot_img(img[0,1,:,:], mPath.DataPath_Log + "Input0-" + str(epoch) + ".jpg", "Input",2)
                 ut.plot_img(mask[0, :, :, :], mPath.DataPath_Log + "Mask0-" + str(epoch) + ".jpg", "Mask",2)
                 ut.plot_img(preds[0, :, :], mPath.DataPath_Log + "Output0-" + str(epoch) + ".jpg", "Output",2)
 
@@ -202,8 +202,8 @@ def train_net(net,
     pass
 
 if __name__=='__main__':
-    net=ResUnet(n_channels=1,n_classes=Output_Class)
-    # net=ResUnet34(n_channels=1,n_classes=Output_Class)
+    # net=ResUnet(n_channels=3,n_classes=Output_Class)
+    net=ResUnet34(n_channels=3,n_classes=Output_Class)
     # net=torch.hub.load('mateuszbuda/brain-segmentation-pytorch','unet',in_channels=3,out_channels=1,init_features=32,pretrained=True)
     # dummy_input=torch.rand(Train_Batch_Size,1,256,256)
     # writer.add_graph(net,input_to_model=(dummy_input,))

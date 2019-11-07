@@ -140,6 +140,12 @@ def Consecutive(img,index,step,pos):
         # print(i)
     return img
 
+def predict_part(img,max_index,step,pos):
+    i=max_index
+    while not i==max_index+step*pos:
+
+
+    pass
 for i in range(0,70,1):
     output_name='test-segmentation-'+str(i)+'.nii'
     volume_path='F:/Workspace/python/Data/Data_LiTS/volume_predict/'
